@@ -1,0 +1,130 @@
+page {
+    background: #fff;
+}
+
+
+.dealer-bg image {
+    width: 100%;
+}
+
+.widget-body .widget {
+    width: 350px;
+    box-sizing: border-box;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.11);
+    border-radius: 6px;
+}
+
+.widget__base {
+    margin-top: -30px;
+}
+
+.widget__base .base__user {
+    position: relative;
+    padding: 7.5px 20px;
+    border-bottom: 0.5px solid #e7e7e7;
+}
+
+.widget__base .base__user .user-avatar {
+    position: absolute;
+    top: -37.5px;
+    right: 30px;
+}
+
+.widget__base .base__user .user-avatar image {
+    width: 75px;
+    height: 75px;
+    z-index: 10;
+    border: 2px solid #fff;
+    border-radius: 50%;
+}
+
+.widget__base .base__user .user-nickName {
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+.widget__base .base__capital {
+    padding: 17.5px;
+}
+
+.widget__base .base__capital .capital-card {
+    height: 100px;
+    padding: 15px 0;
+    background-color: #8e84fc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.widget__base .base__capital .capital-card .card-right .withdraw-btn {
+    width: 65px;
+    height: 25px;
+    line-height: 25px;
+    background: #fff;
+    color: #8e84fc;
+    border-radius: 12.5px;
+    margin-right: 16px;
+}
+
+.widget__base .base__capital .capital-already {
+    padding: 10px;
+    padding-bottom: 0;
+}
+
+/* 操作列表 */
+
+.widget__operat {
+    padding: 25px;
+    margin-top: 20px;
+}
+
+.widget__operat .operat__item {
+    width: 33.33333%;
+    float: left;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.widget__operat .operat__item:last-child {
+    margin-bottom: 0;
+}
+
+.widget__operat .operat__item .item__icon {
+    margin-bottom: 4px;
+}
+
+.widget__operat .operat__item .item__icon text {
+    font-size: 30px;
+}
+
+/* 当前不是分销商 */
+
+.no-dealer {
+    padding-top: 75px;
+}
+
+.no-icon image {
+    width: 210px;
+    height: 120px;
+}
+
+.no-msg {
+    padding: 43px 0;
+}
+
+.form-submit button {
+    font-size: 15px;
+    background: #786cff;
+    border: 0.5px solid #786cff;
+    color: white;
+    border-radius: 25px;
+    padding: 0 40px;
+    min-width: 235px;
+    box-sizing: border-box;
+}
+
+.form-submit button[disabled] {
+    background: #8e84fc;
+    border-color: #8e84fc;
+    color: white;
+}

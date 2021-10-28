@@ -1,0 +1,110 @@
+page {
+    background: #fff;
+}
+
+.c-violet {
+    color: #786cff;
+}
+
+.col-bb {
+    color: #bbb;
+}
+
+.dealer-bg image {
+    width: 100%;
+}
+
+.widget-body .widget {
+    width: 350px;
+    box-sizing: border-box;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.11);
+    border-radius: 6px;
+}
+
+/* 提现金额 */
+
+.widget__capital {
+    padding: 5px 0;
+    margin-top: -30px;
+}
+
+.widget__capital .capital__item {
+    height: 40px;
+    padding: 5px 17.5px;
+    font-size: 14px;
+    border-bottom: 0.5px solid #e7e7e7;
+    box-sizing: border-box;
+}
+
+.widget__capital .capital__item:last-child {
+    border-bottom: none;
+}
+
+.widget__capital .capital__item .item__left {
+    margin-right: 10px;
+}
+
+.capital__lowest {
+    width: 350px;
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+
+/* 提现方式 */
+
+.widget__form {
+    padding: 5px 0 10px 0;
+}
+
+.widget__form .form__title {
+    padding: 8px 17.5px;
+    border-bottom: 0.5px solid #e7e7e7;
+}
+
+.widget__form .form__box {
+    padding: 10px 17.5px;
+}
+
+.widget__form .form__field {
+    height: 40px;
+    padding: 0;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.widget__form .form__field .radio__icon {
+    font-size: 19px;
+    margin-right: 6px;
+}
+
+.widget__form .form__field .field-input input {
+    background-color: #f9f9f9;
+    height: 35px;
+    width:100%;
+    border:0;
+    padding: 5px 10px;
+    box-sizing: border-box;
+}
+
+/* 提交申请 */
+
+.form-submit {
+    margin-top: 20px;
+}
+
+.form-submit button {
+    font-size: 15px;
+    background: #786cff;
+    border: 0.5px solid #786cff;
+    color: white;
+    border-radius: 25px;
+    padding: 0 60px;
+    width:181px;
+    height:39px;
+}
+
+.form-submit button[disabled] {
+    background: #8e84fc;
+    border-color: #8e84fc;
+    color: white;
+}

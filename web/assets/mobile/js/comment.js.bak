@@ -1,0 +1,323 @@
+$(function () {
+    var token = window.localStorage.getItem("token");
+    var orderArr = [];
+    var filesArrParam = [];
+    $.ajax({
+        type : "get",
+        dataType : "json",
+        url : "/?s=/api/user.comment/order",
+        data : {
+            order_id : order_id,
+            wxapp_id : 10001,
+            token : token
+        },
+        success : function (data) {
+            if(data.code == 1){
+                var card = '';
+                data.data.goodsList.forEach(item => {
+                    card += `
+                        <div class="goods-item goods-item-${item.order_id}" data-goods_id = "${item.goods_id}" data-order_id = "${item.order_id}" data-order_goods_id = "${item.order_goods_id}" style="margin-bottom:20px;">
+                            <div class="weui-media-box__bd  pd-10 " style="background:#fff;border-top:1px solid #ccc;border-bottom:1px solid #ccc;">
+                                <div class="weui-media-box_appmsg ord-pro-list">
+                                    <div class="weui-media-box__hd">
+                                        <a href="/?s=/mobile/goods/detail/goods_id/10006">
+                                            <img class="weui-media-box__thumb" src="http://barley.zuowey.com/uploads/202002242328207e6883084.jpg"
+                                                 alt="">
+                                        </a>
+                                    </div>
+                                    <div class="weui-media-box__bd">
+                                        <h1 class="weui-media-box__desc">
+                                            <a href="/?s=/mobile/order/detail/order_id/10015" class="ord-pro-link">
+                                                ${item.goods_name}
+                                            </a>
+                                        </h1>
+                                        <div class="clear mg-t-10">
+                                            <div class="wy-pro-pri fl">¥<em class="num font-15">${item.total_price}</em></div>
+                                            <div class="pro-amount fr">
+                                                <span class="font-13">数量×<em class="name">${item.total_num}</em></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="order-list-Below clear">
+                                <h1>商品评价</h1>
+                                <ul>
+                                    <li class="on"></li>
+                                    <li class="on"></li>
+                                    <li class="on"></li>
+                                    <li class="on"></li>
+                                    <li class="on"></li>
+                                </ul>
+                            </div>
+                            <div class="weui-cells weui-cells_form com-txt-area commentText">
+                                <div class="weui-cell">
+                                    <div class="weui-cell__bd">
+                                        <textarea class="weui-textarea txt-area commentTextarea" placeholder="这个商品满足你的期待吗？说说你的使用心得，分享给想买的他们吧" rows="3"></textarea>
+                                        <div class="weui-textarea-counter font-12 num">
+                                            <span>
+                                            0/200
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="weui-cells weui-cells_form">
+                                    <div class="weui-cell">
+                                        <div class="weui-cell__bd">
+                                            <div class="weui-uploader">
+                                                <div class="weui-uploader__hd">
+                                                    <p class="weui-uploader__title font-14">
+                                                        图片上传
+                                                    </p>
+                                                    <!--<div class="weui-uploader__info font-12">
+                                                        0/2
+                                                    </div>-->
+                                                </div>
+                                                <div class="weui-uploader__bd">
+                                                    <ul class="weui-uploader__files" class="uploaderFiles">
+                                                    </ul>
+                                                    <div class="weui-uploader__input-box">
+                                                        <input class="weui-uploader__input uploaderInput" type="file" accept="image/*" multiple="">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="goods-item goods-item-${item.order_id}" data-goods_id = "${item.goods_id}" data-order_id = "10006" data-order_goods_id = "${item.order_goods_id}" style="margin-bottom:20px;">
+                            <div class="weui-media-box__bd  pd-10 " style="background:#fff;border-top:1px solid #ccc;border-bottom:1px solid #ccc;">
+                                <div class="weui-media-box_appmsg ord-pro-list">
+                                    <div class="weui-media-box__hd">
+                                        <a href="/?s=/mobile/goods/detail/goods_id/10006">
+                                            <img class="weui-media-box__thumb" src="${item.goods_image}"alt="">
+                                        </a>
+                                    </div>
+                                    <div class="weui-media-box__bd">
+                                        <h1 class="weui-media-box__desc">
+                                            <a href="/?s=/mobile/order/detail/order_id/10015" class="ord-pro-link">
+                                                ${item.goods_name}
+                                            </a>
+                                        </h1>
+                                        <div class="clear mg-t-10">
+                                            <div class="wy-pro-pri fl">¥<em class="num font-15">${item.total_price}</em></div>
+                                            <div class="pro-amount fr">
+                                                <span class="font-13">数量×<em class="name">${item.total_num}</em></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="order-list-Below clear">
+                                <h1>商品评价</h1>
+                                <ul>
+                                    <li class="on"></li>
+                                    <li class="on"></li>
+                                    <li class="on"></li>
+                                    <li class="on"></li>
+                                    <li class="on"></li>
+                                </ul>
+                            </div>
+                            <div class="weui-cells weui-cells_form com-txt-area commentText">
+                                <div class="weui-cell">
+                                    <div class="weui-cell__bd">
+                                        <textarea class="weui-textarea txt-area commentTextarea" placeholder="这个商品满足你的期待吗？说说你的使用心得，分享给想买的他们吧" rows="3"></textarea>
+                                        <div class="weui-textarea-counter font-12 num">
+                                            <span>
+                                            0/200
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="weui-cells weui-cells_form">
+                                    <div class="weui-cell">
+                                        <div class="weui-cell__bd">
+                                            <div class="weui-uploader">
+                                                <div class="weui-uploader__hd">
+                                                    <p class="weui-uploader__title font-14">
+                                                        图片上传
+                                                    </p>
+                                                    <!--<div class="weui-uploader__info font-12">
+                                                        0/2
+                                                    </div>-->
+                                                </div>
+                                                <div class="weui-uploader__bd">
+                                                    <ul class="weui-uploader__files" class="uploaderFiles">
+                                                    </ul>
+                                                    <div class="weui-uploader__input-box">
+                                                        <input class="weui-uploader__input uploaderInput" type="file" accept="image/*" multiple="">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                $(".weui-content").html(card);
+                /**
+                 * star处理
+                 */
+                $(".order-list-Below ul li").click(
+                    function() {
+                        var num = $(this).index() + 1;
+                        var len = $(this).index();
+                        var thats = $(this).parent(".order-list-Below ul").find("li");
+                        if ($(thats).eq(len).attr("class") == "on") {
+                            if (num == 2 || num == 4) {
+                                $.alert("1颗星-差评，3颗星-中评，5颗星-好评");
+                                return false;
+                            }
+                            if ($(thats).eq(num).attr("class") == "on") {
+                                $(thats).removeClass();
+                                for (var i = 0; i < num; i++) {
+                                    $(thats).eq(i).addClass("on");
+                                }
+                            } else {
+                                $(thats).removeClass();
+                                for (var k = 0; k < len; k++) {
+                                    $(thats).eq(k).addClass("on");
+                                }
+                            }
+                        } else {
+                            if (num == 2 || num == 4) {
+                                $.alert("1颗星-差评，3颗星-中评，5颗星-好评");
+                                return false;
+                            }
+                            $(thats).removeClass();
+                            for (var j = 0; j < num; j++) {
+                                $(thats).eq(j).addClass("on");
+                            }
+                        }
+                    }
+                );
+
+                var goods_item = $(".goods-item");
+                for (var i = 0; i < goods_item.length; i++){
+                    var order_id = goods_item[i].getAttribute("data-order_id");
+                    filesArrParam[order_id] = [];
+                }
+                $(document).delegate(".uploaderInput","change",function () {
+                    /**
+                     * 设置文件加载到li标签
+                     * @type {jQuery|HTMLElement}
+                     * @private
+                     */
+                    var _this = $(this);
+                    var file = _this[0].files[0];    //获取文件信息
+                    if(file)
+                    {
+                        var reader=new FileReader();  //调用FileReader
+                        reader.readAsDataURL(file); //将文件读取为 DataURL(base64)
+                        reader.onload=function(evt){   //读取操作完成时触发。
+                            _this.parent().parent().find("ul").append(`
+                                <li class="weui-uploader__file" style="background-image:url(`+evt.target.result+`)"></li>
+                            `);
+                        };
+                    }
+                    var order_id = $(this).parents(".goods-item").data("order_id");
+                    var goods_id = $(this).parents(".goods-item").data("goods_id");
+                    var order_goods_id = $(this).parents(".goods-item").data("order_goods_id");
+                    var starNum = $(".on").length;
+                    var score = 10;
+                    if(starNum == 1){
+                        score = 30;
+                    }else if(starNum == 3){
+                        score = 20;
+                    }else if(starNum == 5){
+                        score = 10;
+                    }
+                    orderArr[order_id]  = {
+                        "order_id" : order_id,
+                        "goods_id" : goods_id,
+                        "order_goods_id" : order_goods_id,
+                        "score" : score,
+                        "content" : $(this).parents(".commentText").find(".commentTextarea").val(),
+                        "image_list": null,
+                        "uploaded": null,
+                    };
+                    filesArrParam[order_id].push(file);
+                });
+
+            } else if(data.code == -1){
+                $.toast("未登录，系统即将引导您登陆");
+                setTimeout(function () {
+                    location.href="/?s=/mobile/mine";
+                },1000);
+                return false;
+            }
+            return false;
+        }
+    });
+
+
+
+    $(".evaluate").click(function () {
+        var goods_item = $(".goods-item");
+        var orderIdArr = [];
+        for (var i = 0; i < goods_item.length; i++){
+            var order_id = goods_item[i].getAttribute("data-order_id");
+            var nowContent = $(".goods-item-"+order_id).find("textarea").val();
+            if(nowContent !== ""){
+                orderArr[order_id].content = nowContent;
+                orderIdArr.push(order_id);
+            }
+            if(orderArr[order_id] !== undefined && orderArr[order_id].content !== ""){
+                if(orderArr[order_id].content !== ""){
+                    orderIdArr.push(order_id);
+                }else{
+                    $.toast("请填写评价内容");
+                    $(".goods-item-"+order_id).find("textarea").style("border","1px solid red");
+                }
+            }else{
+                $.toast("请填写评价内容");
+                return false;
+            }
+        }
+        console.log(orderArr);
+        var uploaded = [];
+        orderIdArr.forEach(item => {
+
+        })
+        orderIdArr.forEach(item => {
+            uploaded[item] = [];
+            uploaded[item]["images"] = [];
+            uploaded[item]["file_id"] = [];
+            filesArrParam[item].forEach(files => {
+                var formData = new FormData();
+                formData.append("iFile",files);
+                formData.append("wxapp_id",10001);
+                formData.append("token",token);
+                $.ajax({
+                    type : "post",
+                    dataType : "json",
+                    url : "/?s=/api/upload/image",
+                    data : formData,
+                    cache : false,
+                    processData : false ,//不处理数据
+                    contentType : false, //不设置内容类型
+                    success : function (data) {
+                        if(data.code == 1){
+                            uploaded[item]['file_id'].push(data.data.file_id);
+                            uploaded[item]['images'].push(data.data.file_path);
+                        }else{
+                            $.toast("图片上传失败");
+                        }
+                    }
+                });
+            });
+        });
+        var commentParam = [];
+        orderIdArr.forEach(order_id => {
+            orderArr[order_id].image_list = uploaded[order_id].images;
+            orderArr[order_id].uploaded = uploaded[order_id].file_id;
+            commentParam.push(orderArr[order_id]);
+        });
+        console.log(commentParam);
+
+    });
+
+});

@@ -1,0 +1,60 @@
+page {
+    background: #fff;
+}
+
+/* 选项卡 */
+
+.swiper-tab {
+    width: 100%;
+    text-align: center;
+    height: 40px;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+.swiper-tab .swiper-tab-item {
+    width: 33.333333%;
+    height: 100%;
+    font-size: 14px;
+    color: #777;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    border-bottom: 2px solid #ffffff00;
+}
+
+.swiper-tab .on {
+    color: #786cff;
+    border-bottom: 2px solid #786cff;
+}
+
+/* 设置scroll-view容器高度 */
+
+.widget-list, .zuowey-notcont {
+    height: 100.1%;
+}
+
+/* 提现明细列表 */
+
+.widget-list {
+    padding: 5px 10px 20px 10px;
+    box-sizing: border-box;
+}
+
+.widget__detail {
+    padding: 10px 7.5px;
+    box-sizing: border-box;
+    font-size: 14px;
+    border-bottom: 0.5px solid #e7e7e7;
+}
+
+.widget__detail .detail__money {
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+
+.widget__detail .detail__reason {
+    margin-top: 7.5px;
+    color: #8e84fc;
+}
