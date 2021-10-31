@@ -12,7 +12,6 @@ use app\common\model\user\PointsLog as PointsLogModel;
 class User extends BaseModel
 {
     protected $name = 'user';
-    public $connection = "database.paimai";
 
     // 性别
     private $gender = ['未知', '男', '女'];

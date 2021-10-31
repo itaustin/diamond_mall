@@ -60,6 +60,12 @@ class User extends UserModel
         return self::detail(['username' => $username], ['address', 'addressDefault', 'grade']);
     }
 
+    public static function setMemberInc($dealer_id,$level){
+        $fields = [1 => 'first_num', 2 => 'second_num', 3 => 'third_num'];
+        $model = static::detail($dealer_id);
+        $model->setInc($fields[$level]);
+    }
+
     /**
      * 用户登录
      * @param array $post
@@ -91,7 +97,7 @@ class User extends UserModel
      * @throws \think\Exception
      * @throws \think\exception\DbException
      */
-    public function login($post)
+    public function login_bak($post)
     {
         /**
          * 调试模拟登陆
@@ -123,6 +129,35 @@ class User extends UserModel
         // 记录缓存, 7天
         Cache::set($this->token, $session, 86400 * 7);
         return $user_id;
+    }
+
+    /**
+     * 用户登录
+     * @param $post
+     */
+    public function login($post){
+        $model = new self();
+//        unset($post['password']);
+        $result = $model->where(array_merge($post,[
+            "is_delete" => 0
+        ]))->find();
+        if(empty($result)){
+            throw new BaseException(["msg" => "用户名或密码错误"]);
+        }
+        if((int)$result['is_lock'] === 1){
+            throw new BaseException(["msg" => "账户已被冻结"]);
+        }
+        // 生成token
+        $this->token = $this->token($result['username']);
+        // 记录缓存, 7天
+        Cache::set($this->token, $result, 86400 * 7);
+        // 生成登录状态Session
+        Session::set('zuowey_mobile',[
+            "is_login" => 1,
+            "detail" => $result->toArray(),
+            "token" => $this->token
+        ]);
+        return $result['user_id'];
     }
 
     public function get_userinfo($code){

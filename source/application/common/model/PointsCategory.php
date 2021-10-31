@@ -30,8 +30,9 @@ class PointsCategory extends BaseModel
     {
         $model = new static;
         if (!Cache::get('points_category_' . $model::$wxapp_id)) {
-            $data = $model->with(['image'])->order(['sort' => 'asc', 'create_time' => 'asc'])->select();
-            $all = !empty($data) ? $data->toArray() : [];
+            $all = $model->with(['image'])
+                ->order(['sort' => 'asc', 'create_time' => 'asc'])
+                ->select();
             $tree = [];
             foreach ($all as $first) {
                 $first['child'] = [];

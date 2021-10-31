@@ -32,6 +32,18 @@ class User extends Controller
         ]);
     }
 
+    public function userInfo(){
+        $this->user['token'] = input('token');
+        $userInfo = $this->getUser();
+        if(!strpos($userInfo['alipay_img'], "img.zuowey.com")) {
+            $userInfo['alipay_img'] = base_url() . $userInfo['alipay_img'];
+        }
+        if(!strpos($userInfo['wechat_img'], "img.zuowey.com")) {
+            $userInfo['wechat_img'] = base_url() . $userInfo['wechat_img'];
+        }
+        return json($this->renderSuccess($userInfo));
+    }
+
     public function getQrcode(){
         $userInfo = $this->detail();
         $url = $this->request->domain()."/?s=/mobile/qrcode/view&mobile=".$userInfo['data']['userInfo']['mobile_phone']."&url=".$this->request->domain()."/?s=/mobile/passport/register--code=".$userInfo['data']['userInfo']['mobile_phone'];

@@ -12,6 +12,7 @@ use think\Cache;
 class Category extends BaseModel
 {
     protected $name = 'category';
+    protected $resultSetType = 'collection';
 
     /**
      * 分类图片
@@ -54,6 +55,35 @@ class Category extends BaseModel
             Cache::tag('cache')->set('category_' . $model::$wxapp_id, compact('all', 'tree'));
         }
         return Cache::get('category_' . $model::$wxapp_id);
+    }
+
+    public static function getNoCacheAll(){
+        $model = new static;
+        $data = $model->with(['image'])
+            ->where("is_display",1)
+            ->order(['sort' => 'asc', 'create_time' => 'asc'])
+            ->select();
+        $all = !empty($data) ? $data->toArray() : [];
+        $tree = [];
+        foreach ($all as $first) {
+            if ($first['parent_id'] != 0) continue;
+            $twoTree = [];
+            foreach ($all as $two) {
+                if ($two['parent_id'] != $first['category_id']) continue;
+                $threeTree = [];
+                foreach ($all as $three)
+                    $three['parent_id'] == $two['category_id']
+                    && $threeTree[$three['category_id']] = $three;
+                !empty($threeTree) && $two['child'] = $threeTree;
+                $twoTree[$two['category_id']] = $two;
+            }
+            if (!empty($twoTree)) {
+                array_multisort(array_column($twoTree, 'sort'), SORT_ASC, $twoTree);
+                $first['child'] = $twoTree;
+            }
+            $tree[$first['category_id']] = $first;
+        }
+        return $all;
     }
 
     /**

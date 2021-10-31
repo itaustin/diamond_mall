@@ -28,7 +28,7 @@ class Controller extends \think\Controller
     public function _initialize()
     {
         // 当前公众号id
-        $this->wxapp_id = $this->getWxappId();
+        $this->wxapp_id = "10001";
         // 验证当前公众号状态
         $this->checkWxapp();
     }

@@ -15,8 +15,6 @@ class BaseModel extends Model
 {
     public static $wxapp_id;
     public static $base_url;
-    protected $connection = "database.default";
-
     protected $alias = '';
 
     /**

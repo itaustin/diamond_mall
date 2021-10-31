@@ -46,7 +46,7 @@ class Grade
         $UserModel = new UserModel;
         // 获取所有等级
         $list = GradeModel::getUsableList(null, ['weight' => 'desc']);
-        if ($list->isEmpty()) {
+        if (empty($list)) {
             return false;
         }
         // 遍历等级，根据升级条件 查询满足消费金额的用户列表，并且他的等级小于该等级

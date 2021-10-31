@@ -8,7 +8,6 @@ class PointsCaptial extends BaseModel
 {
     protected $autoWriteTimestamp = true;
     protected $createTime = "create_time";
-    protected $connection = "database.paimai";
 
     public function getList($user_id){
         $model = new static;

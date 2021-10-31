@@ -10,7 +10,6 @@ namespace app\common\model;
 class UserAddress extends BaseModel
 {
     protected $name = 'user_address';
-    public $connection = "database.paimai";
 
     /**
      * 追加字段
