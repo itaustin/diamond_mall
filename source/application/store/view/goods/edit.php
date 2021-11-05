@@ -232,7 +232,7 @@
                                                 <input type="number" v-model="batchData.stock_num" placeholder="库存数量">
                                             </div>
                                             <div class="am-form-group">
-                                                <input type="number" v-model="batchData.goods_weight" placeholder="重量">
+                                                <input type="text" v-model="batchData.goods_weight" placeholder="重量">
                                             </div>
                                             <div class="am-form-group">
                                                 <button @click="onSubmitBatchData" type="button"
@@ -287,7 +287,7 @@
                                                            v-model="item.form.stock_num" required>
                                                 </td>
                                                 <td>
-                                                    <input type="number" class="ipt-w80" name="goods_weight"
+                                                    <input type="text" class="ipt-w80" name="goods_weight"
                                                            v-model="item.form.goods_weight" required>
                                                 </td>
                                             </tr>
@@ -329,9 +329,9 @@
                                     </div>
                                 </div>
                                 <div class="am-form-group">
-                                    <label class="am-u-sm-3 am-u-lg-2 am-form-label form-require">商品重量(Kg) </label>
+                                    <label class="am-u-sm-3 am-u-lg-2 am-form-label form-require">商品规格 </label>
                                     <div class="am-u-sm-9 am-u-end">
-                                        <input type="number" class="tpl-form-input" name="goods[sku][goods_weight]"
+                                        <input type="text" class="tpl-form-input" name="goods[sku][goods_weight]"
                                                value="<?= $model['sku'][0]['goods_weight'] ?>" required>
                                     </div>
                                 </div>

@@ -11,7 +11,6 @@ use app\common\model\BaseModel;
  */
 class GoodsSpecRel extends BaseModel
 {
-    protected $name = 'sharing_goods_spec_rel';
     protected $updateTime = false;
 
     /**

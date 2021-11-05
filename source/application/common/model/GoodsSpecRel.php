@@ -9,9 +9,6 @@ namespace app\common\model;
  */
 class GoodsSpecRel extends BaseModel
 {
-    protected $name = 'goods_spec_rel';
-    protected $updateTime = false;
-
     /**
      * 关联规格组
      * @return \think\model\relation\BelongsTo
