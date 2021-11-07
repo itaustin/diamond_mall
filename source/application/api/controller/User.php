@@ -4,6 +4,8 @@ namespace app\api\controller;
 
 use app\api\model\dealer\Referee;
 use app\api\model\User as UserModel;
+use app\api\model\Order as OrderModel;
+use app\api\model\UserReferee;
 use app\common\exception\BaseException;
 use think\Cache;
 use think\Cookie;
@@ -42,6 +44,24 @@ class User extends Controller
             $userInfo['wechat_img'] = base_url() . $userInfo['wechat_img'];
         }
         return json($this->renderSuccess($userInfo));
+    }
+
+    public function changeNickName(){
+        $this->user['token'] = input('token');
+        $userInfo = $this->getUser();
+        $model = new UserModel();
+        $nickName = trim(input("nickName"));
+        if(empty($nickName)){
+            return $this->renderError("请填写昵称");
+        }
+        $model->startTrans();
+        try {
+            $model->where("user_id", $userInfo['user_id'])->update(["nickName" => input("nickName")]);
+            $model->commit();
+            return $this->renderSuccess("","修改成功");
+        } catch (\Exception $exception){
+            return $this->renderError($exception->getMessage(), "");
+        }
     }
 
     public function getQrcode(){
@@ -232,6 +252,49 @@ class User extends Controller
         // 当前用户信息
         $userInfo = $this->getUser();
         return $this->renderSuccess(compact('userInfo'));
+    }
+
+    public function team(){
+        $model = new UserReferee();
+        $this->user['token'] = input('token');
+        $user = $this->getUser();
+        $allReferee = $model->with(['user'])->where("level",1)->where("dealer_id",$user['user_id'])->select();
+        $orderModel = new OrderModel();
+        foreach ($allReferee as &$value){
+            $order = $orderModel->with(['goods'])
+                ->where("user_id",$value['user']['user_id'])
+                ->where("order_status", "not in", "20,21")
+                ->where("pay_status", 20)
+                ->select();
+            $count = 0;
+            foreach ($order as $k => $v) {
+                if($v['goods']['is_split'] !== 1){
+                    $count++;
+                }
+            }
+            $value['order_count'] = $count;
+            $value['order_total_price'] = $orderModel
+                ->where("user_id",$value['user']['user_id'])
+                ->where("pay_status", 20)
+                ->sum("pay_price");
+        }
+        return $this->renderSuccess($allReferee);
+    }
+
+    /**
+     * 验证姓名和身份证及昵称
+     */
+    public function certification(){
+        $param = $this->request->param();
+        $this->user['token'] = $param['token'];
+        $user = $this->getUser($param['token']);
+        unset($param['token']);
+        $param['is_certification'] = 1;
+        $model = new UserModel();
+        if($model->where("user_id",$user['user_id'])->update($param)){
+            return $this->renderSuccess("","操作成功");
+        }
+        return $this->renderError("未更新","");
     }
 
     public function check_is_login(){
