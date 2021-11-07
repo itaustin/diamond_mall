@@ -290,7 +290,8 @@ class Order extends Controller
                     'subject' => $orderInfo['goods'][0]['goods_name'],
                     'out_trade_no'=>$orderInfo['order_no'],
                     'timeout_express'=>'180m',
-                    'total_amount'=>$orderInfo['pay_price'],
+//                    'total_amount'=>$orderInfo['pay_price'],
+                    'total_amount'=>"0.01",
                     'product_code'=>'QUICK_MSECURITY_PAY'],
                 JSON_UNESCAPED_UNICODE);
 

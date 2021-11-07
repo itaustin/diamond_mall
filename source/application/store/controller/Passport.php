@@ -381,7 +381,7 @@ class Passport extends Controller
      */
     public function logout()
     {
-        Session::clear('zuowey_store');
+        Session::delete("zuowey_store");
         $this->redirect('passport/login');
     }
 

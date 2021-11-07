@@ -70,7 +70,7 @@ class Goods extends BaseModel
      */
     public function specRel()
     {
-        return $this->belongsToMany('SpecValue', 'ZuoweyGoodsSpecRel')->order(['id' => 'asc']);
+        return $this->belongsToMany('SpecValue', 'GoodsSpecRel')->order(['id' => 'asc']);
     }
 
     /**

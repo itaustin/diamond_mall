@@ -38,9 +38,9 @@ class Address extends Controller
     {
         $model = new UserAddress;
         if ($model->add($this->getUser(), $this->request->post())) {
-            return $this->renderSuccess([], '添加成功');
+            return $this->renderSuccess("", '添加成功');
         }
-        return $this->renderError($model->getError() ?: '添加失败');
+        return $this->renderError($model->getError() ?: '添加失败',"");
     }
 
     /**
@@ -70,9 +70,9 @@ class Address extends Controller
         $user = $this->getUser();
         $model = UserAddress::detail($user['user_id'], $address_id);
         if ($model->edit($this->request->post())) {
-            return $this->renderSuccess([], '更新成功');
+            return $this->renderSuccess("", '更新成功');
         }
-        return $this->renderError($model->getError() ?: '更新失败');
+        return $this->renderError($model->getError() ?: '更新失败', "");
     }
 
     /**
@@ -87,9 +87,9 @@ class Address extends Controller
         $user = $this->getUser();
         $model = UserAddress::detail($user['user_id'], $address_id);
         if ($model->setDefault($user)) {
-            return $this->renderSuccess([], '设置成功');
+            return $this->renderSuccess("", '设置成功');
         }
-        return $this->renderError($model->getError() ?: '设置失败');
+        return $this->renderError($model->getError() ?: '设置失败', "");
     }
 
     /**
@@ -104,9 +104,9 @@ class Address extends Controller
         $user = $this->getUser();
         $model = UserAddress::detail($user['user_id'], $address_id);
         if ($model->remove($user)) {
-            return $this->renderSuccess([], '删除成功');
+            return $this->renderSuccess("", '删除成功');
         }
-        return $this->renderError($model->getError() ?: '删除失败');
+        return $this->renderError($model->getError() ?: '删除失败', "");
     }
 
 }
