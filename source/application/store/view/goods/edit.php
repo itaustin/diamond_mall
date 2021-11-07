@@ -92,6 +92,13 @@
                                 </div>
                             </div>
                             <div class="am-form-group">
+                                <label class="am-u-sm-3 am-u-lg-2 am-form-label">积分倍率 </label>
+                                <div class="am-u-sm-9 am-u-end">
+                                    <input type="number" class="tpl-form-input" name="goods[freeze_points]" value="" required>
+                                    <small>必填，用户支付后系统给到相应的积分！</small>
+                                </div>
+                            </div>
+                            <div class="am-form-group">
                                 <label class="am-u-sm-3 am-u-lg-2 am-form-label form-require">商品图片 </label>
                                 <div class="am-u-sm-9 am-u-end">
                                     <div class="am-form-file">
