@@ -108,6 +108,7 @@ use app\common\enum\DeliveryType as DeliveryTypeEnum;
                                 <th>支付方式</th>
                                 <th>配送方式</th>
                                 <th>交易状态</th>
+                                <th>支付凭证</th>
                                 <th>操作</th>
                             </tr>
                             </thead>
@@ -180,6 +181,11 @@ use app\common\enum\DeliveryType as DeliveryTypeEnum;
                                                     </p>
                                                 <?php endif; ?>
                                             </td>
+                                            <td class="am-text-middle" rowspan="1">
+                                                <div class="tpl-table-black-operation">
+                                                    <img class="view_audit" src="<?php echo $order['audit_image']['file_path'] ?>" style="width:50px;height:50px;" />
+                                                </div>
+                                            </td>
                                             <td class="am-text-middle" rowspan="<?= $goodsCount ?>">
                                                 <div class="tpl-table-black-operation">
                                                     <?php if (checkPrivilege('order/detail')): ?>
@@ -204,6 +210,12 @@ use app\common\enum\DeliveryType as DeliveryTypeEnum;
                                                                href="<?= url('order/detail#cancel',
                                                                    ['order_id' => $order['order_id']]) ?>">去审核</a>
                                                         <?php endif; ?>
+                                                    <?php endif; ?>
+                                                    <?php if($order['order_status']['value'] == 10
+                                                        && $order['is_audit'] == 0
+                                                    ): ?>
+                                                    <a class="item-audit tpl-table-black-operation-del audit"
+                                                       href="javascript:void(0);" data-id="<?php echo $order['order_id'] ?>">审核操作</a>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
@@ -232,6 +244,17 @@ use app\common\enum\DeliveryType as DeliveryTypeEnum;
 <script>
 
     $(function () {
+
+        var url = "index.php?s=/store/order/audit";
+        $('.item-audit').audit('order_id', url);
+
+        $(".view_audit").click(function () {
+            var url = $(this).attr("src");
+            layer.open({
+                "area" : [350, 570],
+                "content" : `<img src="`+url+`" />`
+            });
+        });
 
         /**
          * 订单导出

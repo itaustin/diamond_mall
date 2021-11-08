@@ -220,155 +220,155 @@ class WxPay extends WxBase
         $status = $model->onPaySuccess(PayTypeEnum::WECHAT, $data);
         $orderModel = new OrderModel();
         $setting_data = Setting::getAll('10001')['agent']['values'];
-        if($order['is_area_bonus'] === 0){
-            $orderAddressModel = new OrderAddress();
-            $orderAddressInfo = $orderAddressModel->where('order_id',$order['order_id'])->find();
-            $agentWithModel = new AgentWith();
-            $storeUserModel = new User();
-
-            //省份代理查找，找到后分润
-            $provinceFind = [
-                "province_id" => $orderAddressInfo["province_id"],
-            ];
-            $provinceFind['pay_price'] = [
-                'egt',$setting_data['province']['order_num'] * $setting_data["province"]['order_price']
-            ];
-            /**
-             * 查找市代理
-             */
-            $cityFind = [
-                "province_id" => $orderAddressInfo["province_id"],
-                "city_id" => $orderAddressInfo["city_id"]
-            ];
-            $cityFind['pay_price'] = [
-                'egt',$setting_data['city']['order_num'] * $setting_data["city"]['order_price']
-            ];
-            /**
-             * 查找小区代理
-             */
-            $regionFind = [
-                "province_id" => $orderAddressInfo["province_id"],
-                "city_id" => $orderAddressInfo["city_id"],
-                "region_id" => $orderAddressInfo["region_id"]
-            ];
-            $regionFind['pay_price'] = [
-                'egt',$setting_data['region']['order_num'] * $setting_data["region"]['order_price']
-            ];
-            $provinceInfo = $agentWithModel
-                ->alias("agent_with")
-                ->where($provinceFind)
-                ->where("type",2)
-                ->where("agent_apply.apply_status",20)
-                ->where("agent_with.is_invalidation",0)
-                ->join("agent_apply","agent_apply.agent_with_id = agent_with.agent_with_id")
-                ->field("agent_with.*,agent_apply.*")
-                ->find();
-            $cityInfo = $agentWithModel
-                ->alias("agent_with")
-                ->where($cityFind)
-                ->where("type",3)
-                ->where("agent_apply.apply_status",20)
-                ->where("agent_with.is_invalidation",0)
-                ->join("agent_apply","agent_apply.agent_with_id = agent_with.agent_with_id")
-                ->field("agent_with.*,agent_apply.*")
-                ->find();
-            $regionInfo = $agentWithModel
-                ->alias("agent_with")
-                ->where($regionFind)
-                ->where("type",4)
-                ->where("agent_apply.apply_status",20)
-                ->where("agent_with.is_invalidation",0)
-                ->join("agent_apply","agent_apply.agent_with_id = agent_with.agent_with_id")
-                ->field("agent_with.*,agent_apply.*")
-                ->find();
-            $agent_record = [];
-            if($provinceInfo){
-                //开始给省代理分润
-                if($storeUserModel->where("store_user_id",$provinceInfo['user_id'])->setInc("money",$setting_data["province"]["bonus"])){
-                    $this->doLogs("省级代理分润".$setting_data["province"]["bonus"]);
-                    $record = [
-                        "user_id" => $provinceInfo["user_id"],
-                        "bonus_money" => $setting_data["province"]["bonus"],
-                        "order_id" => $order['order_id'],
-                        "agent_type" => 2,
-                        "create_time" => time(),
-                        "update_time" => time()
-                    ];
-                    array_push($agent_record,$record);
-                }
-            }
-            if($cityInfo){
-                if($storeUserModel->where("store_user_id",$cityInfo['user_id'])->setInc("money",$setting_data["city"]["bonus"])){
-                    $this->doLogs("市级代理分润".$setting_data["city"]["bonus"]);
-                    $record = [
-                        "user_id" => $cityInfo["user_id"],
-                        "bonus_money" => $setting_data["city"]["bonus"],
-                        "order_id" => $order['order_id'],
-                        "agent_type" => 3,
-                        "create_time" => time(),
-                        "update_time" => time()
-                    ];
-                    array_push($agent_record,$record);
-                }
-            }
-            if($regionInfo){
-                if($storeUserModel->where("store_user_id",$regionInfo['user_id'])->setInc("money",$setting_data["region"]["bonus"])){
-                    $this->doLogs("区级代理分润".$setting_data["region"]["bonus"]);
-                    $record = [
-                        "user_id" => $regionInfo["user_id"],
-                        "bonus_money" => $setting_data["region"]["bonus"],
-                        "order_id" => $order['order_id'],
-                        "agent_type" => 4,
-                        "create_time" => time(),
-                        "update_time" => time()
-                    ];
-                    array_push($agent_record,$record);
-                }
-            }
-            $address_detail = $orderAddressInfo['detail'];
-            $area_agent = $agentWithModel->where([
-                "province_id" => $orderAddressInfo['province_id'],
-                "city_id" => $orderAddressInfo['city_id'],
-                "region_id" => $orderAddressInfo['region_id'],
-                "type" => 5,
-                "is_invalidation" => 0,
-                "pay_price" => ['>=' ,
-                    $setting_data['area']['order_num'] * $setting_data["area"]['order_price']
-                ]
-            ])->select();
-            $find_area_agent = [
-                "store_user_id" => 0
-            ];
-            foreach ($area_agent as $key => $value){
-                $area_id = mb_substr($value["area_id"],0 , 4);
-                $is_have = count(explode($area_id, $address_detail));
-                if($is_have > 1){
-                    $find_area_agent['store_user_id'] = $value['user_id'];
-                    break;
-                }
-            }
-            if($find_area_agent['store_user_id'] !== 0){
-                if($storeUserModel->where("store_user_id",$find_area_agent['store_user_id'])->setInc("money",$setting_data["area"]["bonus"])){
-                    $this->doLogs("小区代理分润".$setting_data["area"]["bonus"]);
-                    $record = [
-                        "user_id" => $find_area_agent["store_user_id"],
-                        "bonus_money" => $setting_data["area"]["bonus"],
-                        "order_id" => $order['order_id'],
-                        "agent_type" => 5,
-                        "create_time" => time(),
-                        "update_time" => time()
-                    ];
-                    array_push($agent_record,$record);
-                }
-            }
-            $bonus_record_model = new AgentBonusRecord();
-            $bonus_record_model->saveAll($agent_record);
-            if(!empty($agent_record)){
-                $orderModel->where("order_id",$order['order_id'])->update([
-                    'is_area_bonus' => 1
-                ]);
-            }
-        }
+//        if($order['is_area_bonus'] === 0){
+//            $orderAddressModel = new OrderAddress();
+//            $orderAddressInfo = $orderAddressModel->where('order_id',$order['order_id'])->find();
+//            $agentWithModel = new AgentWith();
+//            $storeUserModel = new User();
+//
+//            //省份代理查找，找到后分润
+//            $provinceFind = [
+//                "province_id" => $orderAddressInfo["province_id"],
+//            ];
+//            $provinceFind['pay_price'] = [
+//                'egt',$setting_data['province']['order_num'] * $setting_data["province"]['order_price']
+//            ];
+//            /**
+//             * 查找市代理
+//             */
+//            $cityFind = [
+//                "province_id" => $orderAddressInfo["province_id"],
+//                "city_id" => $orderAddressInfo["city_id"]
+//            ];
+//            $cityFind['pay_price'] = [
+//                'egt',$setting_data['city']['order_num'] * $setting_data["city"]['order_price']
+//            ];
+//            /**
+//             * 查找小区代理
+//             */
+//            $regionFind = [
+//                "province_id" => $orderAddressInfo["province_id"],
+//                "city_id" => $orderAddressInfo["city_id"],
+//                "region_id" => $orderAddressInfo["region_id"]
+//            ];
+//            $regionFind['pay_price'] = [
+//                'egt',$setting_data['region']['order_num'] * $setting_data["region"]['order_price']
+//            ];
+//            $provinceInfo = $agentWithModel
+//                ->alias("agent_with")
+//                ->where($provinceFind)
+//                ->where("type",2)
+//                ->where("agent_apply.apply_status",20)
+//                ->where("agent_with.is_invalidation",0)
+//                ->join("agent_apply","agent_apply.agent_with_id = agent_with.agent_with_id")
+//                ->field("agent_with.*,agent_apply.*")
+//                ->find();
+//            $cityInfo = $agentWithModel
+//                ->alias("agent_with")
+//                ->where($cityFind)
+//                ->where("type",3)
+//                ->where("agent_apply.apply_status",20)
+//                ->where("agent_with.is_invalidation",0)
+//                ->join("agent_apply","agent_apply.agent_with_id = agent_with.agent_with_id")
+//                ->field("agent_with.*,agent_apply.*")
+//                ->find();
+//            $regionInfo = $agentWithModel
+//                ->alias("agent_with")
+//                ->where($regionFind)
+//                ->where("type",4)
+//                ->where("agent_apply.apply_status",20)
+//                ->where("agent_with.is_invalidation",0)
+//                ->join("agent_apply","agent_apply.agent_with_id = agent_with.agent_with_id")
+//                ->field("agent_with.*,agent_apply.*")
+//                ->find();
+//            $agent_record = [];
+//            if($provinceInfo){
+//                //开始给省代理分润
+//                if($storeUserModel->where("store_user_id",$provinceInfo['user_id'])->setInc("money",$setting_data["province"]["bonus"])){
+//                    $this->doLogs("省级代理分润".$setting_data["province"]["bonus"]);
+//                    $record = [
+//                        "user_id" => $provinceInfo["user_id"],
+//                        "bonus_money" => $setting_data["province"]["bonus"],
+//                        "order_id" => $order['order_id'],
+//                        "agent_type" => 2,
+//                        "create_time" => time(),
+//                        "update_time" => time()
+//                    ];
+//                    array_push($agent_record,$record);
+//                }
+//            }
+//            if($cityInfo){
+//                if($storeUserModel->where("store_user_id",$cityInfo['user_id'])->setInc("money",$setting_data["city"]["bonus"])){
+//                    $this->doLogs("市级代理分润".$setting_data["city"]["bonus"]);
+//                    $record = [
+//                        "user_id" => $cityInfo["user_id"],
+//                        "bonus_money" => $setting_data["city"]["bonus"],
+//                        "order_id" => $order['order_id'],
+//                        "agent_type" => 3,
+//                        "create_time" => time(),
+//                        "update_time" => time()
+//                    ];
+//                    array_push($agent_record,$record);
+//                }
+//            }
+//            if($regionInfo){
+//                if($storeUserModel->where("store_user_id",$regionInfo['user_id'])->setInc("money",$setting_data["region"]["bonus"])){
+//                    $this->doLogs("区级代理分润".$setting_data["region"]["bonus"]);
+//                    $record = [
+//                        "user_id" => $regionInfo["user_id"],
+//                        "bonus_money" => $setting_data["region"]["bonus"],
+//                        "order_id" => $order['order_id'],
+//                        "agent_type" => 4,
+//                        "create_time" => time(),
+//                        "update_time" => time()
+//                    ];
+//                    array_push($agent_record,$record);
+//                }
+//            }
+//            $address_detail = $orderAddressInfo['detail'];
+//            $area_agent = $agentWithModel->where([
+//                "province_id" => $orderAddressInfo['province_id'],
+//                "city_id" => $orderAddressInfo['city_id'],
+//                "region_id" => $orderAddressInfo['region_id'],
+//                "type" => 5,
+//                "is_invalidation" => 0,
+//                "pay_price" => ['>=' ,
+//                    $setting_data['area']['order_num'] * $setting_data["area"]['order_price']
+//                ]
+//            ])->select();
+//            $find_area_agent = [
+//                "store_user_id" => 0
+//            ];
+//            foreach ($area_agent as $key => $value){
+//                $area_id = mb_substr($value["area_id"],0 , 4);
+//                $is_have = count(explode($area_id, $address_detail));
+//                if($is_have > 1){
+//                    $find_area_agent['store_user_id'] = $value['user_id'];
+//                    break;
+//                }
+//            }
+//            if($find_area_agent['store_user_id'] !== 0){
+//                if($storeUserModel->where("store_user_id",$find_area_agent['store_user_id'])->setInc("money",$setting_data["area"]["bonus"])){
+//                    $this->doLogs("小区代理分润".$setting_data["area"]["bonus"]);
+//                    $record = [
+//                        "user_id" => $find_area_agent["store_user_id"],
+//                        "bonus_money" => $setting_data["area"]["bonus"],
+//                        "order_id" => $order['order_id'],
+//                        "agent_type" => 5,
+//                        "create_time" => time(),
+//                        "update_time" => time()
+//                    ];
+//                    array_push($agent_record,$record);
+//                }
+//            }
+//            $bonus_record_model = new AgentBonusRecord();
+//            $bonus_record_model->saveAll($agent_record);
+//            if(!empty($agent_record)){
+//                $orderModel->where("order_id",$order['order_id'])->update([
+//                    'is_area_bonus' => 1
+//                ]);
+//            }
+//        }
         $orderModel = $orderModel::getUserOrderDetail($order['order_id'],$order['user_id']);
         $orderGoodsModel = new OrderGoods();
         $goods_id = $orderGoodsModel->where('order_id',$order['order_id'])->field('goods_id')->find()['goods_id'];
@@ -392,13 +392,6 @@ class WxPay extends WxBase
      */
     public function notify_alipay($data)
     {
-        $data['fund_bill_list'] = htmlspecialchars_decode($data['fund_bill_list']);
-        $str = "";
-        foreach ($data as $key => $value){
-            $str .= $key . '=' .$value . '&';
-        }
-        $str = substr($str,0,strlen($str)-1);
-        $this->doLogs($str);
         $this->doLogs($data);
         $aopModel = new AliPayUserModel(
             config('alipay')['appId'],

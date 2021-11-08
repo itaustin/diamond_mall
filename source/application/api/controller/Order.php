@@ -271,6 +271,13 @@ class Order extends Controller
             } else {
                 return $this->renderError("积分不足","");
             }
+        } else if($goodsList[0]['category_id'] == 10001) {
+            // 上传截图
+            $model->where("order_id", $orderInfo["order_id"])
+                ->update([
+                    "audit_image_id" => $params["audit_image_id"]
+                ]);
+            return $this->renderJson(3, "购买成功，请耐心等待积分到账。", "");
         } else {
             $aliUser = new AliPayUserModel(
                 config('alipay')['appId'],

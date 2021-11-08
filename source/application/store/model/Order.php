@@ -36,7 +36,7 @@ class Order extends OrderModel
         // 检索查询条件
         !empty($query) && $this->setWhere($query);
         // 获取数据列表
-        return $this->with(['goods.image', 'address', 'user'])
+        return $this->with(['goods.image', 'address', 'user', 'audit_image'])
             ->alias('order')
             ->field('order.*')
 //            ->join('user', 'user.user_id = order.user_id')

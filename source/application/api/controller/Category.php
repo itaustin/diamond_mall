@@ -32,4 +32,10 @@ class Category extends Controller
         return $this->renderSuccess(compact('templet', 'list'));
     }
 
+    public function getList(){
+        $model = new CategoryModel();
+        $data = $model->where("category_id", "not in", "10006")
+            ->select();
+        return $this->renderSuccess($data);
+    }
 }

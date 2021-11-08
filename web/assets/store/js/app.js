@@ -85,6 +85,22 @@
             });
         },
 
+        audit: function (index, url, msg) {
+            $(this).click(function () {
+                var param = {};
+                param[index] = $(this).attr('data-id');
+                layer.confirm(msg ? msg : '确定审核通过吗？', {title: '友情提示'}
+                    , function (index) {
+                        $.post(url, param, function (result) {
+                            result.code === 1 ? $.show_success(result.msg, result.url)
+                                : $.show_error(result.msg);
+                        });
+                        layer.close(index);
+                    }
+                );
+            });
+        },
+
         /**
          * 选择图片文件
          * @param option

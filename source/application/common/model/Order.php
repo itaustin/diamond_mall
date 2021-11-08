@@ -51,6 +51,10 @@ class Order extends BaseModel
         return $this->hasMany("app\\{$module}\\model\\OrderGoods");
     }
 
+    public function auditImage(){
+        return $this->hasOne("app\\common\\model\\UploadFile", "file_id", "audit_image_id");
+    }
+
     /**
      * 关联订单收货地址表
      * @return \think\model\relation\HasOne
