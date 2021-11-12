@@ -8,6 +8,7 @@ class PointsCaptial extends BaseModel
 {
     protected $autoWriteTimestamp = true;
     protected $createTime = "create_time";
+    protected $updateTime = false;
 
     public function getList($user_id){
         $model = new static;

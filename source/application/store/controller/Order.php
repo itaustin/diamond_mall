@@ -180,13 +180,14 @@ class Order extends Controller
                 "out_trade_no" => $orderInfo["order_no"]
             ];
             // 开始赠送黄金券
-            $gold_g = $orderInfo["order_price"] % 1000;
+            $gold_g = $orderInfo["order_price"] / 1000;
             $gold_g = bcadd($gold_g, 0 ,0);
             $goldCouponModel = new GoldCoupon();
             $goldCouponModel->save([
                 "user_id" => $orderInfo["user_id"],
                 "order_id" => $orderInfo["order_id"],
-                "money" => $gold_g
+                "money" => $gold_g,
+                "is_need_fee" => 0
             ]);
             $orderCompleteModel->onPaySuccess(PayTypeEnum::WECHAT, $data);
             $model->commit();

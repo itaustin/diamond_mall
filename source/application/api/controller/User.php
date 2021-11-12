@@ -7,6 +7,7 @@ use app\api\model\User as UserModel;
 use app\api\model\Order as OrderModel;
 use app\api\model\UserReferee;
 use app\common\exception\BaseException;
+use app\common\model\GoldCoupon;
 use think\Cache;
 use think\Cookie;
 use think\Session;
@@ -353,5 +354,32 @@ class User extends Controller
 
     public function customer_service(){
         return $this->renderSuccess("13220169439");
+    }
+
+    public function redeem_gold(){
+        $user = $this->getUser();
+        $model = new UserModel();
+        $g = input("g");
+        $points = bcmul($g, 739, 1);
+        $goldCouponModel = new GoldCoupon();
+        $model->startTrans();
+        try {
+            if($user["freeze_points"] >= $points){
+                $model->where("user_id", $user["user_id"])
+                    ->setDec("freeze_points", $points);
+                $goldCouponModel->insert([
+                    "user_id" => $user["user_id"],
+                    "order_id" => 0,
+                    "money" => $gold_g,
+                    "is_need_fee" => 1
+                ]);
+                $model->commit();
+                return $this->renderSuccess("","兑换成功");
+            } else {
+                return $this->renderError("您的可用积分不足以兑换{$g}g黄金", "");
+            }
+        } catch (BaseException $exception) {
+            return $this->renderError($exception->getMessage(),"");
+        }
     }
 }

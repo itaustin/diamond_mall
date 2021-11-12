@@ -219,7 +219,7 @@ return [
         'host' => '127.0.0.1',
         'select' => 3,
         'port' => '56379',
-        'password'       => 'itaustin@gmail.c',
+        'password'  => 'itaustin@gmail.c',
         // 缓存保存目录
         'path' => CACHE_PATH,
         // 缓存前缀
