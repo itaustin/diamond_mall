@@ -17,6 +17,10 @@ class PointsCaptial extends BaseModel
             ->select();
     }
 
+    public function order(){
+        return $this->hasOne("app\api\model\Order", "order_id", "order_id");
+    }
+
     public function user(){
         return $this->hasOne("User","user_id","user_id");
     }

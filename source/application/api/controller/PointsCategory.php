@@ -34,4 +34,10 @@ class PointsCategory extends Controller
         return $this->renderSuccess($data,"获取成功");
     }
 
+    public function getList(){
+        $model = new PointsCategoryModel;
+        $data = $model
+            ->select();
+        return $this->renderSuccess($data);
+    }
 }

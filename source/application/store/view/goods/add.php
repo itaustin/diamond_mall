@@ -83,11 +83,11 @@
                                     </small>
                                 </div>
                             </div>
-                            <div class="am-form-group">
-                                <label class="am-u-sm-3 am-u-lg-2 am-form-label">积分倍率 </label>
+                            <div class="am-form-group points_bei">
+                                <label class="am-u-sm-3 am-u-lg-2 am-form-label form-require">积分倍率 </label>
                                 <div class="am-u-sm-9 am-u-end">
-                                    <input type="number" class="tpl-form-input" name="goods[freeze_points]" value="" required>
-                                    <small>必填，用户支付后系统给到相应的积分！</small>
+                                    <input type="number" class="tpl-form-input" name="goods[points_times]" value="" required>
+                                    <small>必填，报单商城的倍率！</small>
                                 </div>
                             </div>
                             <div class="am-form-group">
@@ -686,6 +686,25 @@
         $("input:radio[name='goods[is_alone_grade]']").change(function (e) {
             // e.currentTarget.value !== '0' ? $panelGradeAlone.hide() : $panelGradeAlone.show();
             $panelGradeAlone.toggle();
+        });
+
+        $(".category").change(function () {
+            var category_id = $(this).val();
+            if(category_id == 10001) {
+                let html = `
+                        <div class="am-form-group points_bei">
+                            <label class="am-u-sm-3 am-u-lg-2 am-form-label form-require">积分倍率 </label>
+                            <div class="am-u-sm-9 am-u-end">
+                                <input type="number" class="tpl-form-input" name="goods[points_times]" value="<? $model['points_times'] ?>" required>
+                                <small>必填，报单商城的倍率！</small>
+                            </div>
+                        </div>
+                `;
+                $(".points_category").append(html);
+            }
+            if(category_id == 10002){
+                $(".points_bei").remove();
+            }
         });
 
     });

@@ -451,7 +451,7 @@ class Access extends AccessModel
                 ]
             ],
             [
-                'name' => '公众号',
+                'name' => 'APP设置',
                 'url' => 'wxapp',
                 'subset' => [
                     [

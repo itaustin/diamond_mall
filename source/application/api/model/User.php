@@ -144,9 +144,6 @@ class User extends UserModel
         if(empty($result)){
             throw new BaseException(["msg" => "用户名或密码错误"]);
         }
-        if((int)$result['is_lock'] === 1){
-            throw new BaseException(["msg" => "账户已被冻结"]);
-        }
         // 生成token
         $this->token = $this->token($result['username']);
         // 记录缓存, 7天

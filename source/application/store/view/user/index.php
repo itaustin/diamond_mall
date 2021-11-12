@@ -14,17 +14,17 @@
                                 <div class="am fr">
                                     <div class="am-form-group am-fl">
                                         <?php $grade = $request->get('grade'); ?>
-                                        <select name="grade"
-                                                data-am-selected="{btnSize: 'sm', placeholder: '请选择会员等级'}">
-                                            <option value=""></option>
-                                            <?php foreach ($gradeList as $item): ?>
-                                                <option value="<?= $item['grade_id'] ?>"
-                                                    <?= $grade == $item['grade_id'] ? 'selected' : '' ?>><?= $item['name'] ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
+<!--                                        <select name="grade"-->
+<!--                                                data-am-selected="{btnSize: 'sm', placeholder: '请选择会员等级'}">-->
+<!--                                            <option value=""></option>-->
+<!--                                            --><?php //foreach ($gradeList as $item): ?>
+<!--                                                <option value="--><?//= $item['grade_id'] ?><!--"-->
+<!--                                                    --><?//= $grade == $item['grade_id'] ? 'selected' : '' ?><?//= $item['name'] ?>
+<!--                                                </option>-->
+<!--                                            --><?php //endforeach; ?>
+<!--                                        </select>-->
                                     </div>
-                                    <div class="am-form-group am-fl">
+                                    <!--<div class="am-form-group am-fl">
                                         <?php $gender = $request->get('gender'); ?>
                                         <select name="gender"
                                                 data-am-selected="{btnSize: 'sm', placeholder: '请选择性别'}">
@@ -43,11 +43,12 @@
                                             </option>
                                         </select>
                                     </div>
+                                    -->
                                     <div class="am-form-group am-fl">
                                         <div class="am-input-group am-input-group-sm tpl-form-border-form">
-                                            <input type="text" class="am-form-field" name="nickName"
+                                            <input type="text" class="am-form-field" name="real_name"
                                                    placeholder="请输入昵称"
-                                                   value="<?= $request->get('nickName') ?>">
+                                                   value="<?= $request->get('real_name') ?>">
                                             <div class="am-input-group-btn">
                                                 <button class="am-btn am-btn-default am-icon-search"
                                                         type="submit"></button>
@@ -67,13 +68,17 @@
 <!--                                <th>支付宝头像</th>-->
                                 <th>昵称</th>
 <!--                                <th>用户余额</th>-->
-                                <th>可用积分</th>
+                                <th>购物积分</th>
+                                <th>兑换积分</th>
+                                <th>手续费积分</th>
+                                <th>真实姓名</th>
+                                <th>是否实名认证</th>
 <!--                                <th>会员等级</th>-->
 <!--                                <th>实际消费金额</th>-->
-                                <th>性别</th>
-                                <th>国家</th>
-                                <th>省份</th>
-                                <th>城市</th>
+<!--                                <th>性别</th>-->
+<!--                                <th>国家</th>-->
+<!--                                <th>省份</th>-->
+<!--                                <th>城市</th>-->
                                 <th>注册时间</th>
                                 <th>操作</th>
                             </tr>
@@ -87,17 +92,21 @@
 <!--                                            <img src="--><?//= $item['avatarUrl'] ?><!--" width="72" height="72" alt="">-->
 <!--                                        </a>-->
 <!--                                    </td>-->
-                                    <td class="am-text-middle"><?= $item['active_code'] ?></td>
+                                    <td class="am-text-middle"><?= $item['username'] ?></td>
 <!--                                    <td class="am-text-middle">--><?//= $item['balance'] ?><!--</td>-->
                                     <td class="am-text-middle"><?= $item['points'] ?></td>
-                                    <td class="am-text-middle">
-                                        <?= !empty($item['grade']) ? $item['grade']['name'] : '--' ?>
-                                    </td>
+                                    <td class="am-text-middle"><?= $item['freeze_points'] ?></td>
+                                    <td class="am-text-middle"><?= $item['handling_fee_points'] ?></td>
+                                    <td class="am-text-middle"><?= $item['real_name'] ?></td>
+                                    <td class="am-text-middle"><?= $item['is_certification'] == 0 ? "<span style='color:red;'>未认证</span>" : "已认证" ?></td>
+<!--                                    <td class="am-text-middle">-->
+<!--                                        --><?//= !empty($item['grade']) ? $item['grade']['name'] : '--' ?>
+<!--                                    </td>-->
 <!--                                    <td class="am-text-middle">--><?//= $item['expend_money'] ?><!--</td>-->
 <!--                                    <td class="am-text-middle">--><?//= $item['gender'] ?><!--</td>-->
-                                    <td class="am-text-middle"><?= $item['country'] ?: '--' ?></td>
-                                    <td class="am-text-middle"><?= $item['province'] ?: '--' ?></td>
-                                    <td class="am-text-middle"><?= $item['city'] ?: '--' ?></td>
+<!--                                    <td class="am-text-middle">--><?//= $item['country'] ?: '--' ?><!--</td>-->
+<!--                                    <td class="am-text-middle">--><?//= $item['province'] ?: '--' ?><!--</td>-->
+<!--                                    <td class="am-text-middle">--><?//= $item['city'] ?: '--' ?><!--</td>-->
                                     <td class="am-text-middle"><?= $item['create_time'] ?></td>
                                     <td class="am-text-middle">
                                         <div class="tpl-table-black-operation">
@@ -113,6 +122,17 @@
 <!--                                                    充值-->
 <!--                                                </a>-->
 <!--                                            --><?php //endif; ?>
+                                            <a class="j-recharge tpl-table-black-operation-default"
+                                                   href="javascript:void(0);"
+                                                   title="用户充值"
+                                                   data-id="<?= $item['user_id'] ?>"
+                                                   data-balance="<?= $item['balance'] ?>"
+                                                   data-points="<?= $item['points'] ?>"
+                                                   data-handling_fee_points="<?= $item['handling_fee_points'] ?>"
+                                            >
+                                                    <i class="iconfont icon-qiandai"></i>
+                                                    充值积分
+                                            </a>
 <!--                                            --><?php //if (checkPrivilege('user/grade')): ?>
 <!--                                                <a class="j-grade tpl-table-black-operation-default"-->
 <!--                                                   href="javascript:void(0);"-->
@@ -219,60 +239,61 @@
             <div class="j-tabs am-tabs">
 
                 <ul class="am-tabs-nav am-nav am-nav-tabs">
-                    <li class="am-active"><a href="#tab1">充值余额</a></li>
+<!--                    <li class="am-active"><a href="#tab1">充值余额</a></li>-->
                     <li><a href="#tab2">充值积分</a></li>
+                    <li><a href="#tab3">充值手续费积分</a></li>
                 </ul>
 
                 <div class="am-tabs-bd am-padding-xs">
 
-                    <div class="am-tab-panel am-padding-0 am-active" id="tab1">
-                        <div class="am-form-group">
-                            <label class="am-u-sm-3 am-form-label">
-                                当前余额
-                            </label>
-                            <div class="am-u-sm-8 am-u-end">
-                                <div class="am-form--static">{{ balance }}</div>
-                            </div>
-                        </div>
-                        <div class="am-form-group">
-                            <label class="am-u-sm-3 am-form-label">
-                                充值方式
-                            </label>
-                            <div class="am-u-sm-8 am-u-end">
-                                <label class="am-radio-inline">
-                                    <input type="radio" name="recharge[balance][mode]"
-                                           value="inc" data-am-ucheck checked>
-                                    增加
-                                </label>
-                                <label class="am-radio-inline">
-                                    <input type="radio" name="recharge[balance][mode]" value="dec" data-am-ucheck>
-                                    减少
-                                </label>
-                                <label class="am-radio-inline">
-                                    <input type="radio" name="recharge[balance][mode]" value="final" data-am-ucheck>
-                                    最终金额
-                                </label>
-                            </div>
-                        </div>
-                        <div class="am-form-group">
-                            <label class="am-u-sm-3 am-form-label">
-                                变更金额
-                            </label>
-                            <div class="am-u-sm-8 am-u-end">
-                                <input type="number" min="0" class="tpl-form-input"
-                                       placeholder="请输入要变更的金额" name="recharge[balance][money]" value="" required>
-                            </div>
-                        </div>
-                        <div class="am-form-group">
-                            <label class="am-u-sm-3 am-form-label">
-                                管理员备注
-                            </label>
-                            <div class="am-u-sm-8 am-u-end">
-                                <textarea rows="2" name="recharge[balance][remark]" placeholder="请输入管理员备注"
-                                          class="am-field-valid"></textarea>
-                            </div>
-                        </div>
-                    </div>
+<!--                    <div class="am-tab-panel am-padding-0 am-active" id="tab1">-->
+<!--                        <div class="am-form-group">-->
+<!--                            <label class="am-u-sm-3 am-form-label">-->
+<!--                                当前余额-->
+<!--                            </label>-->
+<!--                            <div class="am-u-sm-8 am-u-end">-->
+<!--                                <div class="am-form--static">{{ balance }}</div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="am-form-group">-->
+<!--                            <label class="am-u-sm-3 am-form-label">-->
+<!--                                充值方式-->
+<!--                            </label>-->
+<!--                            <div class="am-u-sm-8 am-u-end">-->
+<!--                                <label class="am-radio-inline">-->
+<!--                                    <input type="radio" name="recharge[balance][mode]"-->
+<!--                                           value="inc" data-am-ucheck checked>-->
+<!--                                    增加-->
+<!--                                </label>-->
+<!--                                <label class="am-radio-inline">-->
+<!--                                    <input type="radio" name="recharge[balance][mode]" value="dec" data-am-ucheck>-->
+<!--                                    减少-->
+<!--                                </label>-->
+<!--                                <label class="am-radio-inline">-->
+<!--                                    <input type="radio" name="recharge[balance][mode]" value="final" data-am-ucheck>-->
+<!--                                    最终金额-->
+<!--                                </label>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="am-form-group">-->
+<!--                            <label class="am-u-sm-3 am-form-label">-->
+<!--                                变更金额-->
+<!--                            </label>-->
+<!--                            <div class="am-u-sm-8 am-u-end">-->
+<!--                                <input type="number" min="0" class="tpl-form-input"-->
+<!--                                       placeholder="请输入要变更的金额" name="recharge[balance][money]" value="" required>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="am-form-group">-->
+<!--                            <label class="am-u-sm-3 am-form-label">-->
+<!--                                管理员备注-->
+<!--                            </label>-->
+<!--                            <div class="am-u-sm-8 am-u-end">-->
+<!--                                <textarea rows="2" name="recharge[balance][remark]" placeholder="请输入管理员备注"-->
+<!--                                          class="am-field-valid"></textarea>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
 
                     <div class="am-tab-panel am-padding-0" id="tab2">
                         <div class="am-form-group">
@@ -318,6 +339,54 @@
                             </label>
                             <div class="am-u-sm-8 am-u-end">
                                 <textarea rows="2" name="recharge[points][remark]" placeholder="请输入管理员备注"
+                                          class="am-field-valid"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="am-tab-panel am-padding-0" id="tab3">
+                        <div class="am-form-group">
+                            <label class="am-u-sm-3 am-form-label">
+                                手续费积分
+                            </label>
+                            <div class="am-u-sm-8 am-u-end">
+                                <div class="am-form--static">{{ handling_fee_points }}</div>
+                            </div>
+                        </div>
+                        <div class="am-form-group">
+                            <label class="am-u-sm-3 am-form-label">
+                                充值方式
+                            </label>
+                            <div class="am-u-sm-8 am-u-end">
+                                <label class="am-radio-inline">
+                                    <input type="radio" name="recharge[handling_fee_points][mode]"
+                                           value="inc" data-am-ucheck checked>
+                                    增加
+                                </label>
+                                <label class="am-radio-inline">
+                                    <input type="radio" name="recharge[handling_fee_points][mode]" value="dec" data-am-ucheck>
+                                    减少
+                                </label>
+                                <label class="am-radio-inline">
+                                    <input type="radio" name="recharge[handling_fee_points][mode]" value="final" data-am-ucheck>
+                                    最终手续费积分
+                                </label>
+                            </div>
+                        </div>
+                        <div class="am-form-group">
+                            <label class="am-u-sm-3 am-form-label">
+                                变更数量
+                            </label>
+                            <div class="am-u-sm-8 am-u-end">
+                                <input type="number" min="0" class="tpl-form-input"
+                                       placeholder="请输入要变更的数量" name="recharge[handling_fee_points][value]" value="" required>
+                            </div>
+                        </div>
+                        <div class="am-form-group">
+                            <label class="am-u-sm-3 am-form-label">
+                                管理员备注
+                            </label>
+                            <div class="am-u-sm-8 am-u-end">
+                                <textarea rows="2" name="recharge[handling_fee_points][remark]" placeholder="请输入管理员备注"
                                           class="am-field-valid"></textarea>
                             </div>
                         </div>

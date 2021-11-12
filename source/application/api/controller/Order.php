@@ -236,7 +236,7 @@ class Order extends Controller
         $model = new OrderModel();
         $order_no = $model->where('order_id',$Checkout->model['order_id'])->field('order_no')->find()['order_no'];
         $orderInfo = $model->getPayDetail($order_no);
-        if($goodsList[0]['category_id'] == 10006){
+        if($goodsList[0]['category_id'] == "10006" || $goodsList[0]['category_id'] == "10002"){
             // 检测当前订单积分是否满足
             $model = new \app\api\model\User();
             $userInfo = $this->getUser();

@@ -389,13 +389,13 @@ return [
         'index' => 'statistics.data/index',
     ],
     'wxapp' => [
-        'name' => '公众号',
+        'name' => 'APP',
         'icon' => 'icon-wxapp',
         'color' => '#36b313',
         'index' => 'wxapp/setting',
         'submenu' => [
             [
-                'name' => '公众号设置',
+                'name' => 'APP设置',
                 'index' => 'wxapp/setting',
             ],
             [

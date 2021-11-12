@@ -21,7 +21,7 @@ return [
     // 密码
     'password'        => 'TZhJaYmX8jwMniRc',
     // 端口
-    'hostport'        => '3306',
+    'hostport'        => '52673',
     // 连接dsn
     'dsn'             => '',
     // 数据库连接参数

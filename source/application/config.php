@@ -217,6 +217,7 @@ return [
         // 驱动方式
         'type' => 'redis',
         'host' => '127.0.0.1',
+        'select' => 3,
         'port' => '56379',
         'password'       => 'itaustin@gmail.c',
         // 缓存保存目录
@@ -232,8 +233,8 @@ return [
     // +----------------------------------------------------------------------
 
     'session' => [
-        'id'             => '',
-        'select'         => '15',
+//        'id'             => '',
+        'select'         => '2',
         // SESSION_ID的提交变量,解决flash上传跨域
         'var_session_id' => '',
         // SESSION 前缀

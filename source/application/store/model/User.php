@@ -7,6 +7,7 @@ use app\common\model\User as UserModel;
 use app\store\model\dealer\User as DealerUserModel;
 use app\store\model\user\GradeLog as GradeLogModel;
 use app\store\model\user\PointsLog as PointsLogModel;
+use app\store\model\user\HandlingFeePointsLog as HandlingFeePointsLogModel;
 use app\store\model\user\BalanceLog as BalanceLogModel;
 use app\common\enum\user\balanceLog\Scene as SceneEnum;
 use app\common\enum\user\grade\log\ChangeType as ChangeTypeEnum;
@@ -90,10 +91,12 @@ class User extends UserModel
      */
     public function recharge($storeUserName, $source, $data)
     {
-        if ($source == 0) {
+        if ($source == -1) {
             return $this->rechargeToBalance($storeUserName, $data['balance']);
-        } elseif ($source == 1) {
+        } elseif ($source == 0) {
             return $this->rechargeToPoints($storeUserName, $data['points']);
+        } elseif ($source == 1) {
+            return $this->rechargeHandlingFeePoints($storeUserName, $data['handling_fee_points']);
         }
         return false;
     }
@@ -158,6 +161,34 @@ class User extends UserModel
             $this->setInc('points', $diffMoney);
             // 新增积分变动记录
             PointsLogModel::add([
+                'user_id' => $this['user_id'],
+                'value' => $diffMoney,
+                'describe' => "后台管理员 [{$storeUserName}] 操作",
+                'remark' => $data['remark'],
+            ]);
+        });
+        return true;
+    }
+
+    private function rechargeHandlingFeePoints($storeUserName, $data){
+        if (!isset($data['value']) || $data['value'] === '' || $data['value'] < 0) {
+            $this->error = '请输入正确的手续费积分数量';
+            return false;
+        }
+        // 判断充值方式，计算最终积分
+        if ($data['mode'] === 'inc') {
+            $diffMoney = $data['value'];
+        } elseif ($data['mode'] === 'dec') {
+            $diffMoney = -$data['value'];
+        } else {
+            $diffMoney = $data['value'] - $this['handling_fee_points'];
+        }
+        // 更新记录
+        $this->transaction(function () use ($storeUserName, $data, $diffMoney) {
+            // 更新账户积分
+            $this->setInc('handling_fee_points', $diffMoney);
+            // 新增积分变动记录
+            HandlingFeePointsLogModel::add([
                 'user_id' => $this['user_id'],
                 'value' => $diffMoney,
                 'describe' => "后台管理员 [{$storeUserName}] 操作",

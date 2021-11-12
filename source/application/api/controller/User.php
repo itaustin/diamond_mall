@@ -258,9 +258,22 @@ class User extends Controller
         $model = new UserReferee();
         $this->user['token'] = input('token');
         $user = $this->getUser();
-        $allReferee = $model->with(['user'])->where("level",1)->where("dealer_id",$user['user_id'])->select();
+        $GLOBALS['all_user'] = [];
+        $data = $this->getFirst($user['user_id']);
+        $allReferee = $model
+            ->with(['user'])
+            ->where("level",input("level"))
+            ->where("dealer_id",$user['user_id'])->select();
+        $firstCount = $model
+            ->where("level",1)
+            ->where("dealer_id",$user['user_id'])->count();
+        $secondCount = $model
+            ->where("level",2)
+            ->where("dealer_id",$user['user_id'])->count();
+        $totalCount = $firstCount + $secondCount;
         $orderModel = new OrderModel();
         foreach ($allReferee as &$value){
+            $value["user"]["username"] = substr_replace($value["user"]["username"], "****", 3, 4);
             $order = $orderModel->with(['goods'])
                 ->where("user_id",$value['user']['user_id'])
                 ->where("order_status", "not in", "20,21")
@@ -268,20 +281,41 @@ class User extends Controller
                 ->select();
             $count = 0;
             foreach ($order as $k => $v) {
-                if($v['goods']['is_split'] !== 1){
-                    $count++;
-                }
+                $count++;
             }
             $value['order_count'] = $count;
+
             $value['order_total_price'] = $orderModel
                 ->where("user_id",$value['user']['user_id'])
                 ->where("pay_status", 20)
                 ->sum("pay_price");
         }
-        return $this->renderSuccess($allReferee);
+        return $this->renderSuccess([
+            "referee" => $allReferee,
+            "count" => [
+                "first" => $firstCount,
+                "second" => $secondCount,
+                "total" => count($GLOBALS['all_user'])
+            ]
+        ]);
     }
 
-    /**
+    public function getFirst($user_id)
+    {
+        $model = new UserReferee();
+        $refereeData = $model->with(['users'])
+            ->where("dealer_id", $user_id)
+            ->where("level", 1)
+            ->field("id,dealer_id, user_id")
+            ->select();
+        foreach ($refereeData as $value) {
+            $GLOBALS['all_user'][] = $value['users']->toArray();
+            $this->getFirst($value["user_id"]);
+        }
+    }
+
+
+        /**
      * 验证姓名和身份证及昵称
      */
     public function certification(){
@@ -306,4 +340,18 @@ class User extends Controller
         }
     }
 
+    public function authorization(){
+        $userInfo = $this->getUser(true);
+        $model = new UserModel;
+        $param = $this->request->param();
+        unset($param['token']);
+        if($model->where("user_id",$userInfo['user_id'])->update($param)){
+            return $this->renderSuccess("","银行卡保存成功");
+        }
+        return $this->renderError("未更新","");
+    }
+
+    public function customer_service(){
+        return $this->renderSuccess("13220169439");
+    }
 }

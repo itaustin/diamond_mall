@@ -4,6 +4,8 @@ namespace app\store\controller;
 
 use app\api\service\order\PaySuccess;
 use app\common\enum\order\PayType as PayTypeEnum;
+use app\common\exception\BaseException;
+use app\common\model\GoldCoupon;
 use app\common\model\PointsCaptial;
 use app\store\model\Order as OrderModel;
 use app\store\model\Express as ExpressModel;
@@ -150,32 +152,48 @@ class Order extends Controller
     public function audit($order_id){
         $model = new OrderModel();
         $orderInfo = $model::detail(["order_id", $order_id]);
-        $model->where("order_id", $order_id)
-            ->update([
-                "is_audit" => 1,
-                "pay_status" => 20,
-                "pay_time" => time()
+        $model->startTrans();
+        try {
+            $model->where("order_id", $order_id)
+                ->update([
+                    "is_audit" => 1,
+                    "pay_status" => 20,
+                    "pay_time" => time()
+                ]);
+            // 发放积分
+            $pointsCapitalModel = new PointsCaptial();
+            $pointsCapitalModel->insert([
+                "user_id" => $orderInfo["user_id"],
+                "type" => 10, // 报单给积分两倍
+                "order_id" => $orderInfo['order_id'],
+                "points" => bcmul($orderInfo['order_price'], 2, 2),
+                "description" => "会员商城赠送积分，等待释放",
+                "create_time" => time(),
+                "consignment_money" => 0.00
             ]);
-        // 发放积分
-        $pointsCapitalModel = new PointsCaptial();
-        $pointsCapitalModel->insert([
-            "user_id" => $orderInfo["user_id"],
-            "type" => 10, // 报单给积分两倍
-            "order_id" => $orderInfo['order_id'],
-            "points" => bcmul($orderInfo['pay_price'], 2, 2),
-            "create_time" => time(),
-            "consignment_money" => 0.00
-        ]);
-        $userModel = new \app\api\model\User();
-        $userModel->where("user_id", $orderInfo["user_id"])
-            ->setInc("points", bcmul($orderInfo['pay_price'], 2, 2));
-        $orderCompleteModel = new PaySuccess($orderInfo["order_no"]);
-        $data = [
-            "trade_no" => "10001",
-            "out_trade_no" => $orderInfo["order_no"]
-        ];
-        $orderCompleteModel->onPaySuccess(PayTypeEnum::WECHAT, $data);
-        return $this->renderSuccess("操作成功");
+            $userModel = new \app\api\model\User();
+            $userModel->where("user_id", $orderInfo["user_id"])
+                ->setInc("points", bcmul($orderInfo['order_price'], 2, 2));
+            $orderCompleteModel = new PaySuccess($orderInfo["order_no"]);
+            $data = [
+                "trade_no" => "10001",
+                "out_trade_no" => $orderInfo["order_no"]
+            ];
+            // 开始赠送黄金券
+            $gold_g = $orderInfo["order_price"] % 1000;
+            $gold_g = bcadd($gold_g, 0 ,0);
+            $goldCouponModel = new GoldCoupon();
+            $goldCouponModel->save([
+                "user_id" => $orderInfo["user_id"],
+                "order_id" => $orderInfo["order_id"],
+                "money" => $gold_g
+            ]);
+            $orderCompleteModel->onPaySuccess(PayTypeEnum::WECHAT, $data);
+            $model->commit();
+            return $this->renderSuccess("操作成功");
+        } catch (BaseException $exception){
+            return $this->renderError($exception->getMessage());
+        }
     }
 
 }
