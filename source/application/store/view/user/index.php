@@ -71,6 +71,7 @@
                                 <th>购物积分</th>
                                 <th>兑换积分</th>
                                 <th>手续费积分</th>
+                                <th>当前等级</th>
                                 <th>真实姓名</th>
                                 <th>是否实名认证</th>
 <!--                                <th>会员等级</th>-->
@@ -97,6 +98,7 @@
                                     <td class="am-text-middle"><?= $item['points'] ?></td>
                                     <td class="am-text-middle"><?= $item['freeze_points'] ?></td>
                                     <td class="am-text-middle"><?= $item['handling_fee_points'] ?></td>
+                                    <td class="am-text-middle"><?= $item['level'] ?></td>
                                     <td class="am-text-middle"><?= $item['real_name'] ?></td>
                                     <td class="am-text-middle"><?= $item['is_certification'] == 0 ? "<span style='color:red;'>未认证</span>" : "已认证" ?></td>
 <!--                                    <td class="am-text-middle">-->
@@ -132,6 +134,15 @@
                                             >
                                                     <i class="iconfont icon-qiandai"></i>
                                                     充值积分
+                                            </a>
+                                            <a class="j-change_level tpl-table-black-operation-default"
+                                                   href="javascript:void(0);"
+                                                   title="修改等级"
+                                                   data-id="<?= $item['user_id'] ?>"
+                                                   data-level="<?= $item['level'] ?>"
+                                            >
+                                                    <i class="iconfont"></i>
+                                                修改等级
                                             </a>
 <!--                                            --><?php //if (checkPrivilege('user/grade')): ?>
 <!--                                                <a class="j-grade tpl-table-black-operation-default"-->
@@ -426,6 +437,41 @@
                     return true;
                 }
             });
+        });
+
+        $(".j-change_level").on('click', function () {
+            var user_id = $(this).data("id");
+            $.showModal({
+                title : "更改等级"
+                , content : `
+                    <div style="text-align: center;margin:0 auto;">
+                        <select class="change_level  tpl-table-black-operation-default" name="level" style="width:40%;margin:0 auto;text-align:center;margin-top:10px;margin-bottom:10px;">
+                          <option value="0">0</option>
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="4">4</option>
+                          <option value="5">5</option>
+                        </select>
+                    </div>
+
+                `, uCheck: true
+                , yes: function () {
+                    var level = $(".change_level").val();
+                    $.ajax({
+                        type : "post",
+                        url : "/api/user/changeLevel",
+                        data : {
+                            "level" : level,
+                            "user_id" : user_id
+                        },
+                        success: function (data) {
+                            layer.msg(data.msg);
+                        }
+                    });
+                    return true;
+                }
+            })
         });
 
         /**

@@ -415,4 +415,15 @@ class User extends Controller
         }
         return $this->renderSuccess($data, "");
     }
+
+    public function changeLevel(){
+        $user_id = input("user_id");
+        $level = input("level");
+        $model = new UserModel();
+        $model->where("user_id", $user_id)
+            ->update([
+                "level" => $level
+            ]);
+        return $this->renderSuccess("", "等级修改成功");
+    }
 }
