@@ -15,6 +15,7 @@ use app\common\enum\DeliveryType as DeliveryTypeEnum;
 use app\common\enum\order\Status as OrderStatusEnum;
 use app\common\enum\order\PayType as PayTypeEnum;
 use app\common\enum\order\PayStatus as PayStatusEnum;
+use app\common\model\User;
 use app\common\service\goods\source\Factory as FactoryStock;
 use app\common\service\order\Complete as OrderCompleteService;
 use app\common\exception\BaseException;

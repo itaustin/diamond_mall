@@ -257,10 +257,19 @@ class User extends Controller
 
     public function team(){
         $model = new UserReferee();
+        $orderModel = new OrderModel();
         $this->user['token'] = input('token');
         $user = $this->getUser();
         $GLOBALS['all_user'] = [];
-        $data = $this->getFirst($user['user_id']);
+        $this->getFirst($user['user_id']);
+        $user_ids = "";
+        foreach ($GLOBALS['all_user'] as $value) {
+            $user_ids .= $value["user_id"] . ",";
+        }
+        $user_ids = $user_ids . $user["user_id"];
+        $team_total_price = $orderModel
+            ->where("pay_status", 20)
+            ->where("user_id", "in", $user_ids)->sum("pay_price");
         $allReferee = $model
             ->with(['user'])
             ->where("level",input("level"))
@@ -296,7 +305,8 @@ class User extends Controller
             "count" => [
                 "first" => $firstCount,
                 "second" => $secondCount,
-                "total" => count($GLOBALS['all_user'])
+                "total" => count($GLOBALS['all_user']),
+                "team_total_price" => $team_total_price
             ]
         ]);
     }
@@ -360,17 +370,17 @@ class User extends Controller
         $user = $this->getUser();
         $model = new UserModel();
         $g = input("g");
-        $points = bcmul($g, 739, 1);
+        $freeze_points = input("handling_fee_points");
         $goldCouponModel = new GoldCoupon();
         $model->startTrans();
         try {
-            if($user["freeze_points"] >= $points){
+            if($user["freeze_points"] >= $freeze_points){
                 $model->where("user_id", $user["user_id"])
-                    ->setDec("freeze_points", $points);
+                    ->setDec("freeze_points", $freeze_points);
                 $goldCouponModel->insert([
                     "user_id" => $user["user_id"],
                     "order_id" => 0,
-                    "money" => $gold_g,
+                    "money" => $g,
                     "is_need_fee" => 1
                 ]);
                 $model->commit();
@@ -381,5 +391,28 @@ class User extends Controller
         } catch (BaseException $exception) {
             return $this->renderError($exception->getMessage(),"");
         }
+    }
+
+    public function teamList(){
+        $userInfo = $this->getUser();
+        $GLOBALS['all_user'] = [];
+        $model = new \app\api\model\Order();
+        $this->getFirst($userInfo["user_id"]);
+        $data = $GLOBALS['all_user'];
+        $userModel = new UserModel();
+        foreach ($data as &$value) {
+            $GLOBALS['all_user'] = [];
+            $this->getFirst($value["user_id"]);
+            $user_ids = "";
+            foreach ($GLOBALS['all_user'] as $vv) {
+                $user_ids .= $vv["user_id"] . ",";
+            }
+            $price = $model
+                ->where("pay_status", 20)
+                ->sum("pay_price");
+            $value["total_price"] = "{$price}";
+            $value['username'] = substr_replace($value['username'],'****',3,4);;
+        }
+        return $this->renderSuccess($data, "");
     }
 }

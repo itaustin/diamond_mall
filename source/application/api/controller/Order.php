@@ -5,13 +5,14 @@ namespace app\api\controller;
 use app\api\model\Cart as CartModel;
 use app\api\model\dealer\Withdraw;
 use app\api\model\Order as OrderModel;
+use app\api\model\UserReferee;
 use app\api\service\order\Checkout as CheckoutModel;
 use app\api\service\order\PaySuccess;
 use app\api\validate\order\Checkout as CheckoutValidate;
 use app\common\enum\order\PayType;
-use app\common\exception\BaseException;
 use app\common\library\alipay\AlipayUser as AliPayUserModel;
 use app\common\model\PointsCaptial;
+use app\common\model\User;
 
 vendor('aop.request.AlipayTradeWapPayRequest');
 vendor('aop.request.AlipayTradePagePayRequest');
@@ -132,16 +133,16 @@ class Order extends Controller
         $model = new OrderModel();
         $order_no = $model->where('order_id',$Checkout->model['order_id'])->field('order_no')->find()['order_no'];
         $orderInfo = $model->getPayDetail($order_no);
-        if($goodsList[0]['category_id'] == 10006){
+        if($goodsList[0]['category_id'] == 10006 || $goodsList[0]['category_id'] == 10002){
             // 检测当前订单积分是否满足
             $model = new \app\api\model\User();
             $needPoints = $goodsList[0]['total_points'];
             $userInfo = $this->getUser();
-            if($userInfo['mall_points'] >= $needPoints){
+            if($userInfo['points'] >= $needPoints){
                 // 积分足够，进行扣积分操作
                 $pointsCaptialModel = new PointsCaptial();
                 try {
-                    $model->where("user_id", $userInfo['user_id'])->setDec("mall_points", $needPoints);
+                    $model->where("user_id", $userInfo['user_id'])->setDec("points", $needPoints);
                     // 记录积分流向
                     $pointsCaptialModel->insert([
                         "user_id" => $userInfo['user_id'],
@@ -240,18 +241,20 @@ class Order extends Controller
             // 检测当前订单积分是否满足
             $model = new \app\api\model\User();
             $userInfo = $this->getUser();
-            if($userInfo['mall_points'] >= $orderInfo['pay_price']){
+            if($userInfo['points'] >= $orderInfo['pay_price']){
                 // 积分足够，进行扣积分操作
                 $pointsCaptialModel = new PointsCaptial();
                 try {
-                    $model->where("user_id", $userInfo['user_id'])->setDec("mall_points", $orderInfo['pay_price']);
+                    $model->where("user_id", $userInfo['user_id'])
+                        ->setDec("points", $orderInfo['pay_price']);
                     // 记录积分流向
                     $pointsCaptialModel->insert([
                         "user_id" => $userInfo['user_id'],
-                        "type" => 50,
+                        "type" => 20,
                         "order_id" => $orderInfo['order_id'],
                         "points" => $orderInfo['pay_price'],
                         "create_time" => time(),
+                        "description" => "订单支付",
                         "consignment_money" => 0.00
                     ]);
                     // 标注订单支付

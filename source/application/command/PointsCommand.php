@@ -11,6 +11,7 @@ use app\common\model\User;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
+use think\Queue;
 
 class PointsCommand extends Command
 {
@@ -24,12 +25,12 @@ class PointsCommand extends Command
     protected function execute(Input $input, Output $output)
     {
         $this->output = $output;
-        $output->writeln('任务开始');
+//        $output->writeln('任务开始');
         $this->bonus();
     }
 
     public function bonus(){
-        $this->output->writeln("开始释放积分");
+//        $this->output->writeln("开始释放积分");
         // 首先计算团队并且更新数据
         $model = new User();
         $refereeModel = new UserReferee();
@@ -41,13 +42,45 @@ class PointsCommand extends Command
         $model->startTrans();
         try {
             // 首次释放0.003
-            foreach ($allUser as $k => $value){
+            foreach ($allUser as $value) {
                 // 每日释放千分之3
-                $thousand = bcmul($value["points"], 0.003, 2);
-                $model->where("user_id", $value["user_id"])
-                    ->setDec("points", $thousand);
-                $model->where("user_id", $value["user_id"])
-                    ->setInc("freeze_points", $thousand);
+                $thousand = bcmul($value["all_points"], 0.003, 2);
+                // 上拿一代
+                $bottomFirstDirectPush = $refereeModel
+                    ->where("dealer_id", $value["user_id"])
+                    ->where("level", 1)
+                    ->select();
+                $bottomFirstDirectPushPeopleCount = 0;
+                foreach ($bottomFirstDirectPush as $haveCount) {
+                    $info = $model->where("user_id", $haveCount["user_id"])
+                        ->where("points", ">", "0")->find();
+                    if (!empty($info)) {
+                        $bottomFirstDirectPushPeopleCount++;
+                    }
+                }
+                $mySelfPercent20 = bcmul($thousand, 0.2, 2);
+                if ($bottomFirstDirectPushPeopleCount == 0) {
+                    $divFirstDirectPushPoints = 0;
+                } else {
+                    $divFirstDirectPushPoints = bcdiv($mySelfPercent20, $bottomFirstDirectPushPeopleCount, 2);
+                }
+                $info = $model->where("user_id", $value["user_id"])->find();
+                if ($divFirstDirectPushPoints > 0) {
+                    foreach ($bottomFirstDirectPush as $directPushValue) {
+                        // 开始分配上拿积分
+                        $pointsCapitalModel->insert([
+                            "order_id" => 0,
+                            "type" => 40,
+                            "user_id" => $directPushValue["user_id"],
+                            "points" => $divFirstDirectPushPoints,
+                            "description" => "上拿一代{$info['username']}的加速释放",
+                            "consignment_money" => 0,
+                            "is_delete" => 0,
+                            "wxapp_id" => 10001,
+                            "create_time" => time()
+                        ]);
+                    }
+                }
                 $pointsCapitalModel->insert([
                     "order_id" => 0,
                     "type" => 30,
@@ -59,29 +92,8 @@ class PointsCommand extends Command
                     "wxapp_id" => 10001,
                     "create_time" => time()
                 ]);
-                $this->output->writeln("【" . $value["username"] . "<{$value['user_id']}>的静态释放为：" . $thousand . "】");
-                // 开始计算他个人的上拿一代和下拿两代
-                // 上拿一代
-                $inviteUser = $refereeModel
-                    ->where("user_id", $value["user_id"])
-                    ->where("level", 1)
-                    ->find()["dealer_id"];
-                // 开始查询上拿一代是否有报单
-                if($inviteUser) {
-                    $parentStatus = $this->checkUserStatus($inviteUser);
-                    if($parentStatus){
-//                        $this->output->writeln($value["user_id"] . "的邀请人是：" . $first);
-                        $this->dealWithUser($value["user_id"], $inviteUser, 0);
-                    }
-                }
+//                $this->output->writeln("【" . $value["username"] . "<{$value['user_id']}>的静态释放为：" . $thousand . "】");
                 // 开始查询下拿一代是否有报单
-//                if($first) {
-//                    $firstStatus = $this->checkUserStatus($first);
-//                    if($firstStatus){
-//                        $this->output->writeln($value["user_id"] . "的直推人是：" . $first);
-//                        $this->dealWithUser($value["user_id"], $first, 1);
-//                    }
-//                }
                 $first = $refereeModel
                     ->where("dealer_id", $value["user_id"])
                     ->with(['user'])
@@ -89,21 +101,19 @@ class PointsCommand extends Command
                     ->select();
                 $firstTotalPoints = 0;
                 $name_str = "";
-                foreach ($first as $firstValue){
+                foreach ($first as $firstValue) {
                     // 检测是否有积分
-                    if($firstValue["user"]["points"] > 0) {
+                    if ($firstValue["user"]["points"] > 0) {
                         // 有积分接着操作
-                        $firstThousand = bcmul($firstValue["user"]["points"], 0.003, 2);
+                        $firstThousand = bcmul($firstValue["user"]["all_points"], 0.003, 2);
                         $firstTotalPoints = $firstThousand + $firstTotalPoints;
                         $name_str .= $firstValue["user"]["username"] . ",";
                     }
                 }
-                // 下拿一代的30%
-                if($firstTotalPoints > 0) {
+                //下拿一代的30%
+                if ($firstTotalPoints > 0) {
                     $percent30 = bcmul($firstTotalPoints, 0.3, 2);
-                    $model->where("user_id", $value["user_id"])->setDec("points", $percent30);
-                    $model->where("user_id", $value["user_id"])->setInc("freeze_points", $percent30);
-                    $name_str = substr($name_str,0,strlen($name_str)-1);;
+                    $name_str = substr($name_str, 0, strlen($name_str) - 1);;
                     $pointsCapitalModel->insert([
                         "order_id" => 0,
                         "type" => 40,
@@ -125,21 +135,19 @@ class PointsCommand extends Command
                     ->select();
                 $secondTotalPoints = 0;
                 $name_str = "";
-                foreach ($second as $firstValue){
+                foreach ($second as $firstValue) {
                     // 检测是否有积分
-                    if($firstValue["user"]["points"] > 0) {
+                    if ($firstValue["user"]["points"] > 0) {
                         // 有积分接着操作
-                        $secondThousand = bcmul($firstValue["user"]["points"], 0.003, 2);
+                        $secondThousand = bcmul($firstValue["user"]["all_points"], 0.003, 2);
                         $secondTotalPoints = $secondThousand + $secondTotalPoints;
                         $name_str .= $firstValue["user"]["username"] . ",";
                     }
                 }
                 // 下拿二代的50%
-                if($secondTotalPoints > 0) {
+                if ($secondTotalPoints > 0) {
                     $percent50 = bcmul($secondTotalPoints, 0.5, 2);
-                    $model->where("user_id", $value["user_id"])->setDec("points", $percent50);
-                    $model->where("user_id", $value["user_id"])->setInc("freeze_points", $percent50);
-                    $name_str = substr($name_str,0,strlen($name_str)-1);;
+                    $name_str = substr($name_str, 0, strlen($name_str) - 1);;
                     $pointsCapitalModel->insert([
                         "order_id" => 0,
                         "type" => 40,
@@ -157,96 +165,58 @@ class PointsCommand extends Command
                 // 计算自己是什么等级
                 $this->checkTeamGrade($value["user_id"]);
             }
-            // 查询所有订单
-            $allOrder = $orderModel
-                ->whereTime("create_time", "yesterday")
-                ->where("pay_status", 20)
+
+            $allUser = $model
+                ->where("points", ">", 0)
                 ->select();
-            foreach ($allOrder as $orderInfo) {
-                // 上找所有人
-                $GLOBALS['allParentUserIds'] = [];
-                $this->getTopLine($orderInfo["user_id"]);
-                $refereeLineData = $GLOBALS['allParentUserIds'];
-                $new_mark = 0;
-                $position = 0;
-                $topPercent = 0;
-                foreach ($refereeLineData as &$refereeUser) {
-                    if($position == 3){
-                        break;
-                    }
-                    $level = $this->checkTeamGrade($refereeUser);
-                    $percent = 0;
-                    if($level == 5) {
-                        $percent = 1.2;
-                    } else if($level == 4) {
-                        $percent = 0.9;
-                    } else if($level == 3){
-                        $percent = 0.6;
-                    } else if($level == 2){
-                        $percent = 0.4;
-                    } else if($level == 1) {
-                        $percent = 0.2;
-                    } else if($level == 0) {
-                        $percent = 0;
-                    }
-                    $points = $model->where("user_id", $refereeUser)->value("points");
-                    if($level > 0){
-                        if($new_mark > $level){
-                            // 拿该拿的剩下的
-                            $thousand = bcmul($orderInfo["pay_price"], 0.003, 2);
-                            $percentPoints = bcmul($topPercent, $percent, 2);
-                            // 拿自己的减去上一次的
-                            $mySelfPoints = $percentPoints - $topPercent;
-                            // 检测自己积分，积分不足就不释放了
-                            if($points > 0){
-                                $model->where("user_id", $refereeUser)->setDec("points", $mySelfPoints);
-                                $model->where("user_id", $refereeUser)->setInc("freeze_points", $mySelfPoints);
-                                $name_str = substr($name_str,0,strlen($name_str)-1);;
-                                $pointsCapitalModel->insert([
-                                    "order_id" => 0,
-                                    "type" => 50,
-                                    "user_id" => $refereeUser,
-                                    "points" => $percentPoints,
-                                    "description" => "拿团队的加速释放",
-                                    "consignment_money" => 0,
-                                    "is_delete" => 0,
-                                    "wxapp_id" => 10001,
-                                    "create_time" => time()
-                                ]);
-                            }
-                            $new_mark = $level;
-                            $position++;
-                            $topPercent = $percentPoints;
-                        } else {
-                            $thousand = bcmul($orderInfo["pay_price"], 0.003, 2);
-                            if($topPercent > 0){
-                                $percentPoints = bcmul($topPercent, $percent, 2);
-                            } else {
-                                $percentPoints = bcmul($thousand, $percent, 2);
-                            }
-                            if($points > 0){
-                                $model->where("user_id", $refereeUser)->setDec("points", $percentPoints);
-                                $model->where("user_id", $refereeUser)->setInc("freeze_points", $percentPoints);
-                                $name_str = substr($name_str,0,strlen($name_str)-1);;
-                                $pointsCapitalModel->insert([
-                                    "order_id" => 0,
-                                    "type" => 50,
-                                    "user_id" => $refereeUser,
-                                    "points" => $percentPoints,
-                                    "description" => "拿团队的加速释放",
-                                    "consignment_money" => 0,
-                                    "is_delete" => 0,
-                                    "wxapp_id" => 10001,
-                                    "create_time" => time()
-                                ]);
-                            }
-                            $new_mark = $level;
-                            $position++;
-                            $topPercent = $percentPoints;
-                        }
-                    }
+            foreach ($allUser as $allUserValue) {
+                echo "------------------------------------------";
+                $levelGrade = [0,0.2,0.4,0.6,0.9,1.2];
+                $GLOBALS['all_user'] = [];
+                $this->getFirst($allUserValue["user_id"]);
+                $user_ids = "";
+                foreach ($GLOBALS['all_user'] as $value) {
+                    $user_ids .= $value["user_id"] . ",";
                 }
+                $user_ids .= $allUserValue["user_id"];
+                $allPoints = $model->where("user_id", "in", $user_ids)
+                    ->sum("all_points");
+                $thousand_3 = bcmul($allPoints, 0.003,2);
+
+                // 查找上级
+                $topUserId = $refereeModel
+                    ->where("user_id", $allUserValue["user_id"])
+                    ->where("level",1)
+                    ->find();
+                // 看上级是什么级别
+                $topUserInfo = $model->where("user_id", $topUserId["dealer_id"])
+                    ->find();
+                $topUserLevel = $topUserInfo["level"];
+//                    dump($allUserValue["level"]);
+                $myLevel = $allUserValue["level"];
+//                    dump($myLevel);
+//                    dump($topUserLevel);
+                if($myLevel < $topUserLevel) {
+                    $percent = bcsub($levelGrade[$topUserLevel], $levelGrade[$myLevel], 2);
+                    $fee = bcmul($thousand_3, $percent, 2);
+                    $pointsCapitalModel->insert([
+                        "order_id" => 0,
+                        "type" => 50,
+                        "user_id" => $topUserId["dealer_id"],
+                        "points" => $fee,
+                        "description" => "拿级差团队的加速释放",
+                        "consignment_money" => 0,
+                        "is_delete" => 0,
+                        "wxapp_id" => 10001,
+                        "create_time" => time()
+                    ]);
+                }
+
             }
+            $jobHandlerClassName = 'app\common\job\OrderQueue';
+            $jobQueueName = "OrderDealWith";
+            $jobData = ["time" => "today"];
+            Queue::later(1, $jobHandlerClassName, $jobData, $jobQueueName);
             $model->commit();
         } catch (BaseException $exception){
             $this->output->writeln($exception->getMessage());
@@ -305,44 +275,180 @@ class PointsCommand extends Command
         return $isHaveMemberMallGoods;
     }
 
-    public function checkTeamGrade($user_id){
+    public function checkTeamFirstGrade($user_id){
         $model = new Order();
-        $userModel = new User();
         $GLOBALS['all_user'] = [];
         $this->getFirst($user_id);
         $myTeamData = $GLOBALS['all_user'];
         $user_ids = "";
-        foreach($myTeamData as $value) {
-            $user_ids .= $value["user_id"] . ",";
+        foreach ($myTeamData as $myTeamDataValue) {
+            $user_ids .= $myTeamDataValue['user_id'] . ",";
         }
+        $user_ids = substr($user_ids, 0 ,strlen($user_ids)-1);
         $totalPerformance = $model
             ->where("user_id", "in", $user_ids)
             ->sum("pay_price");
-        $level = -1;
-        if($totalPerformance >= 200000){
+        if($totalPerformance >= 200000) {
+            return true;
+        }
+        return false;
+    }
+
+    public function checkTeamSecondGrade($user_id){
+        $model = new Order();
+        $refereeModel = new UserReferee();
+        $GLOBALS['all_user'] = [];
+        $this->getFirst($user_id);
+        $myTeamData = $GLOBALS['all_user'];
+        $user_ids = "";
+        foreach ($myTeamData as $myTeamDataValue) {
+            $user_ids .= $myTeamDataValue['user_id'] . ",";
+        }
+        $user_ids = substr($user_ids, 0 ,strlen($user_ids)-1);
+        $totalPerformance = $model
+            ->where("user_id", "in", $user_ids)
+            ->sum("pay_price");
+        if($totalPerformance >= 800000) {
+            $v1Count = 0;
+            $directPush = $refereeModel->where("dealer_id", $user_id)
+                ->where("level", 1)
+                ->select();
+            foreach ($directPush as $directPushValue) {
+                if($this->checkTeamFirstGrade($directPushValue["user_id"])){
+                    $v1Count++;
+                }
+            }
+            if($v1Count >= 2){
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public function checkTeamThirdGrade($user_id) {
+        $model = new Order();
+        $refereeModel = new UserReferee();
+        $GLOBALS['all_user'] = [];
+        $this->getFirst($user_id);
+        $myTeamData = $GLOBALS['all_user'];
+        $user_ids = "";
+        foreach ($myTeamData as $myTeamDataValue) {
+            $user_ids .= $myTeamDataValue['user_id'] . ",";
+        }
+        $user_ids = substr($user_ids, 0 ,strlen($user_ids)-1);
+        $totalPerformance = $model
+            ->where("user_id", "in", $user_ids)
+            ->sum("pay_price");
+        if($totalPerformance >= 2000000) {
+            $v2Count = 0;
+            $dirEctPushThird = $refereeModel->where("dealer_id", $user_id)
+                ->where("level", 1)
+                ->select();
+            foreach ($dirEctPushThird as $thirdEctValue) {
+                if($this->checkTeamSecondGrade($thirdEctValue["user_id"])){
+                    $v2Count++;
+                }
+            }
+            if($v2Count == 2){
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public function checkTeamFourGrade($user_id) {
+        $model = new Order();
+        $refereeModel = new UserReferee();
+        $GLOBALS['all_user'] = [];
+        $this->getFirst($user_id);
+        $myTeamData = $GLOBALS['all_user'];
+        $user_ids = "";
+        foreach ($myTeamData as $myTeamDataValue) {
+            $user_ids .= $myTeamDataValue['user_id'] . ",";
+        }
+        $user_ids = substr($user_ids, 0 ,strlen($user_ids)-1);
+        $totalPerformance = $model
+            ->where("user_id", "in", $user_ids)
+            ->sum("pay_price");
+        if($totalPerformance >= 5000000) {
+            $v3Count = 0;
+            $dirEctPushThird = $refereeModel->where("dealer_id", $user_id)
+                ->where("level", 1)
+                ->select();
+            foreach ($dirEctPushThird as $thirdEctValue) {
+                if($this->checkTeamThirdGrade($thirdEctValue["user_id"])){
+                    $v3Count++;
+                }
+            }
+            if($v3Count == 2){
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public function checkTeamFiveGrade($user_id) {
+        $model = new Order();
+        $refereeModel = new UserReferee();
+        $GLOBALS['all_user'] = [];
+        $this->getFirst($user_id);
+        $myTeamData = $GLOBALS['all_user'];
+        $user_ids = "";
+        foreach ($myTeamData as $myTeamDataValue) {
+            $user_ids .= $myTeamDataValue['user_id'] . ",";
+        }
+        $user_ids = substr($user_ids, 0 ,strlen($user_ids)-1);
+        $totalPerformance = $model
+            ->where("user_id", "in", $user_ids)
+            ->sum("pay_price");
+        if($totalPerformance >= 12000000) {
+            $v4Count = 0;
+            $dirEctPushThird = $refereeModel->where("dealer_id", $user_id)
+                ->where("level", 1)
+                ->select();
+            foreach ($dirEctPushThird as $thirdEctValue) {
+                if($this->checkTeamFourGrade($thirdEctValue["user_id"])){
+                    $v4Count++;
+                }
+            }
+            if($v4Count == 2){
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public function checkTeamGrade($user_id){
+        $level = 0;
+        if($this->checkTeamFirstGrade($user_id)) {
             $level = 1;
         }
-        if($totalPerformance >= 800000) {
-            // 自己检测自己的直推有多少个V1，满足2个V1即可升级V2
+        if($this->checkTeamSecondGrade($user_id)) {
             $level = 2;
         }
-        if($totalPerformance >= 2000000) {
-            // 自己检测自己的直推有多少个V2，满足2个V2即可升级V3
+        if($this->checkTeamThirdGrade($user_id)) {
             $level = 3;
         }
-        if($totalPerformance >= 5000000){
-            // 自己检测自己的直推有多少个V3，满足2个V3即可升级V4
+        if($this->checkTeamFourGrade($user_id)) {
             $level = 4;
         }
-        if($totalPerformance >= 12000000){
-            // 自己检测自己的直推有多少个V4，满足2个V4即可升级V5
+        if($this->checkTeamFiveGrade($user_id)) {
             $level = 5;
         }
+        $userModel = new User();
         $userModel->where("user_id", $user_id)->update([
             "level" => $level
         ]);
-//        $this->output->writeln($user_id . "升级了" . $level . "等级");
         return $level;
+    }
+
+    public function getUserName($user_id){
+        $model = new User();
+        return $model->where("user_id", $user_id)->value("username");
     }
 
     /**
@@ -359,26 +465,22 @@ class PointsCommand extends Command
         $data = $model->where("user_id", $user_id)->find();
         if(!empty($data)){
             $thousandth_three = bcmul($data["points"], 0.003, 2);
-            switch($type){
-                case 0:
-                    // 上拿
-                    // 20%的释放给到自己
-                    $percent20 = bcmul($thousandth_three, 0.2, 2);
-                    $model->where("user_id", $self_user_id)->setDec("points", $percent20);
-                    $model->where("user_id", $self_user_id)->setInc("freeze_points", $percent20);
-                    $pointsCapitalModel->insert([
-                        "order_id" => 0,
-                        "type" => 40,
-                        "user_id" => $self_user_id,
-                        "points" => $percent20,
-                        "description" => "上拿一代{$data['username']}的加速释放",
-                        "consignment_money" => 0,
-                        "is_delete" => 0,
-                        "wxapp_id" => 10001,
-                        "create_time" => time()
-                    ]);
-                    break;
-            }
+            // 上拿
+            // 20%的释放给到自己
+            $percent20 = bcmul($thousandth_three, 0.2, 2);
+            $model->where("user_id", $self_user_id)->setDec("points", $percent20);
+            $model->where("user_id", $self_user_id)->setInc("freeze_points", $percent20);
+            $pointsCapitalModel->insert([
+                "order_id" => 0,
+                "type" => 40,
+                "user_id" => $self_user_id,
+                "points" => $percent20,
+                "description" => "上拿一代{$data['username']}的加速释放",
+                "consignment_money" => 0,
+                "is_delete" => 0,
+                "wxapp_id" => 10001,
+                "create_time" => time()
+            ]);
         }
     }
 }

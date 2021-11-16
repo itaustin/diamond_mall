@@ -49,10 +49,10 @@ class UserAddress extends UserAddressModel
             $regionId = Region::getIdByName($region[2], 3, $cityId);
             // 验证城市ID是否合法
             if (!$this->checkCityId($cityId)) return false;
-            $countStr = mb_strlen($data['detail'],"utf-8");
-            if ($countStr < 4){
-                throw new BaseException(['code' => 3, 'msg' => '详情地址最少需要4个汉字']);
-            }
+//            $countStr = mb_strlen($data['detail'],"utf-8");
+//            if ($countStr < 4){
+//                throw new BaseException(['code' => 3, 'msg' => '详情地址最少需要4个汉字']);
+//            }
             // 添加收货地址
             $this->allowField(true)->save([
                 'name' => $data['name'],
@@ -86,10 +86,10 @@ class UserAddress extends UserAddressModel
         $regionId = Region::getIdByName($region[2], 3, $cityId);
         // 验证城市ID是否合法
         if (!$this->checkCityId($cityId)) return false;
-        $countStr = mb_strlen($data['detail'],"utf-8");
-        if ($countStr < 4){
-            throw new BaseException(['code' => 3, 'msg' => '详情地址最少需要4个汉字']);
-        }
+//        $countStr = mb_strlen($data['detail'],"utf-8");
+//        if ($countStr < 4){
+//            throw new BaseException(['code' => 3, 'msg' => '详情地址最少需要4个汉字']);
+//        }
         // 更新收货地址
         return $this->allowField(true)->save([
                 'name' => $data['name'],

@@ -4,6 +4,7 @@ namespace app\api\controller\user;
 
 use app\api\controller\Controller;
 
+use app\api\model\Goods;
 use app\api\model\Order as OrderModel;
 use app\api\model\Setting as SettingModel;
 use app\api\service\order\PaySuccess;
@@ -61,7 +62,15 @@ class Order extends Controller
     public function listsForAndroid($dataType)
     {
         $model = new OrderModel;
+        $goodsModel = new Goods();
         $list = $model->getList($this->user['user_id'], $dataType);
+        foreach ($list as &$value) {
+            foreach ($value["goods"] as &$goodsValue) {
+                $goodsValue["category_id"] = $goodsModel
+                    ->where("goods_id", $goodsValue["goods_id"])
+                    ->value("category_id");
+            }
+        }
         return [
             "code" => 1,
             "msg" => "成功",

@@ -251,8 +251,7 @@ use app\common\enum\DeliveryType as DeliveryTypeEnum;
         $(".view_audit").click(function () {
             var url = $(this).attr("src");
             layer.open({
-                "area" : [350, 570],
-                "content" : `<img src="`+url+`" />`
+                "content" : `<img style="width: 100%;text-align:center;margin:0 auto;" src="`+url+`" />`
             });
         });
 

@@ -10,5 +10,6 @@
 // +----------------------------------------------------------------------
 
 return [
+    'app\command\PickUpPointsCommand',
     'app\command\PointsCommand',
 ];
