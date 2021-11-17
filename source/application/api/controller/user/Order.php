@@ -195,11 +195,11 @@ class Order extends Controller
         $userModel = new \app\api\model\User();
         $userInfo = $this->getUser();
         if(count($model['goods']) <= 1 && $model['goods'][0]['goods']['category_id'] == 10006 || $model['goods'][0]['goods']['category_id'] == 10002){
-            if($userInfo['mall_points'] >= $model['pay_price']){
+            if($userInfo['points'] >= $model['pay_price']){
                 // 积分足够，进行扣积分操作
                 $pointsCaptialModel = new PointsCaptial();
                 try {
-                    $userModel->where("user_id", $userInfo['user_id'])->setDec("mall_points", $model['pay_price']);
+                    $userModel->where("user_id", $userInfo['user_id'])->setDec("points", $model['pay_price']);
                     // 记录积分流向
                     $pointsCaptialModel->insert([
                         "user_id" => $userInfo['user_id'],

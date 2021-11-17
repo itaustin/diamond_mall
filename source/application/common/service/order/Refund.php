@@ -131,7 +131,7 @@ class Refund
                 "create_time" => time(),
                 "consignment_money" => 0.00
             ]);
-            $userModel->where("user_id", $order['user_id'])->setInc("mall_points", $money);
+            $userModel->where("user_id", $order['user_id'])->setInc("points", $money);
             $userModel->commit();
             return true;
         } catch (BaseException $exception){

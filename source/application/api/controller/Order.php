@@ -131,14 +131,14 @@ class Order extends Controller
         }
         // 构建支付宝请求
         $model = new OrderModel();
-        $order_no = $model->where('order_id',$Checkout->model['order_id'])->field('order_no')->find()['order_no'];
+        $order_no = $model->where('order_id', $Checkout->model['order_id'])->field('order_no')->find()['order_no'];
         $orderInfo = $model->getPayDetail($order_no);
-        if($goodsList[0]['category_id'] == 10006 || $goodsList[0]['category_id'] == 10002){
+        if ($goodsList[0]['category_id'] == 10006 || $goodsList[0]['category_id'] == 10002) {
             // 检测当前订单积分是否满足
             $model = new \app\api\model\User();
             $needPoints = $goodsList[0]['total_points'];
             $userInfo = $this->getUser();
-            if($userInfo['points'] >= $needPoints){
+            if ($userInfo['points'] >= $needPoints) {
                 // 积分足够，进行扣积分操作
                 $pointsCaptialModel = new PointsCaptial();
                 try {
@@ -162,12 +162,12 @@ class Order extends Controller
                         "pay_type" => 40
                     ]);
                     $model->commit();
-                    return $this->renderJson(2,"购买成功");
-                } catch (\Exception $exception){
+                    return $this->renderJson(2, "购买成功");
+                } catch (\Exception $exception) {
                     return $this->renderError($exception->getMessage());
                 }
             } else {
-                return $this->renderError("积分不足","");
+                return $this->renderError("积分不足", "");
             }
         } else {
             $aliUser = new AliPayUserModel(
@@ -183,15 +183,15 @@ class Order extends Controller
             $request = new \AlipayTradeWapPayRequest();
             $info = json_encode(
                 [
-                    'body'=>$orderInfo['goods'][0]['goods_name'],
-                    'subject'=>$orderInfo['goods'][0]['goods_name'],
-                    'out_trade_no'=>$orderInfo['order_no'],
-                    'timeout_express'=>'30m',
-                    'total_amount'=>$orderInfo['pay_price'],
-                    'product_code'=>'QUICK_WAP_WAY'],
+                    'body' => $orderInfo['goods'][0]['goods_name'],
+                    'subject' => $orderInfo['goods'][0]['goods_name'],
+                    'out_trade_no' => $orderInfo['order_no'],
+                    'timeout_express' => '30m',
+                    'total_amount' => $orderInfo['pay_price'],
+                    'product_code' => 'QUICK_WAP_WAY'],
                 JSON_UNESCAPED_UNICODE);
-            $request->setNotifyUrl($this->request->domain()."/alipay.php");
-            $request->setReturnUrl($this->request->domain()."/?s=/mobile/mine");
+            $request->setNotifyUrl($this->request->domain() . "/alipay.php");
+            $request->setReturnUrl($this->request->domain() . "/?s=/mobile/mine");
             $request->setBizContent($info);
             $response = $aliUser->aop->pageExecute($request);
             //htmlspecialchars是为了输出到页面时防止被浏览器将关键参数html转义，实际打印到日志以及http传输不会有这个问题
@@ -235,13 +235,13 @@ class Order extends Controller
         }
         // 构建支付宝请求
         $model = new OrderModel();
-        $order_no = $model->where('order_id',$Checkout->model['order_id'])->field('order_no')->find()['order_no'];
+        $order_no = $model->where('order_id', $Checkout->model['order_id'])->field('order_no')->find()['order_no'];
         $orderInfo = $model->getPayDetail($order_no);
-        if($goodsList[0]['category_id'] == "10006" || $goodsList[0]['category_id'] == "10002"){
+        if ($goodsList[0]['category_id'] == "10006" || $goodsList[0]['category_id'] == "10002") {
             // 检测当前订单积分是否满足
             $model = new \app\api\model\User();
             $userInfo = $this->getUser();
-            if($userInfo['points'] >= $orderInfo['pay_price']){
+            if ($userInfo['points'] >= $orderInfo['pay_price']) {
                 // 积分足够，进行扣积分操作
                 $pointsCaptialModel = new PointsCaptial();
                 try {
@@ -267,19 +267,24 @@ class Order extends Controller
                         "pay_type" => 40
                     ]);
                     $model->commit();
-                    return $this->renderJson(2,"购买成功","");
-                } catch (\Exception $exception){
+                    return $this->renderJson(2, "购买成功", "");
+                } catch (\Exception $exception) {
                     return $this->renderError($exception->getMessage());
                 }
             } else {
-                return $this->renderError("积分不足","");
+                return $this->renderError("积分不足", "");
             }
-        } else if($goodsList[0]['category_id'] == 10001) {
-            // 上传截图
-            $model->where("order_id", $orderInfo["order_id"])
-                ->update([
-                    "audit_image_id" => $params["audit_image_id"]
-                ]);
+        } else if ($goodsList[0]['category_id'] == 10001) {
+            // 检测自己是否有冻结积分
+            if ($this->user["points"] <= 0) {
+                // 上传截图
+                $model->where("order_id", $orderInfo["order_id"])
+                    ->update([
+                        "audit_image_id" => $params["audit_image_id"]
+                    ]);
+            } else {
+                return $this->renderError("您的冻结积分释放完毕后才可复购，请知悉", "");
+            }
             return $this->renderJson(3, "购买成功，请耐心等待积分到账。", "");
         } else {
             $aliUser = new AliPayUserModel(
@@ -298,14 +303,14 @@ class Order extends Controller
                 [
                     'body' => $orderInfo['goods'][0]['goods_name'],
                     'subject' => $orderInfo['goods'][0]['goods_name'],
-                    'out_trade_no'=>$orderInfo['order_no'],
-                    'timeout_express'=>'180m',
+                    'out_trade_no' => $orderInfo['order_no'],
+                    'timeout_express' => '180m',
 //                    'total_amount'=>$orderInfo['pay_price'],
-                    'total_amount'=>"0.01",
-                    'product_code'=>'QUICK_MSECURITY_PAY'],
+                    'total_amount' => "0.01",
+                    'product_code' => 'QUICK_MSECURITY_PAY'],
                 JSON_UNESCAPED_UNICODE);
 
-            $request->setNotifyUrl($this->request->domain()."/alipay.php");
+            $request->setNotifyUrl($this->request->domain() . "/alipay.php");
             $request->setBizContent($info);
             $response = $aliUser->aop->sdkExecute($request);
             //htmlspecialchars是为了输出到页面时防止被浏览器将关键参数html转义，实际打印到日志以及http传输不会有这个问题
@@ -313,57 +318,58 @@ class Order extends Controller
         }
     }
 
-    public function getTotalData(){
+    public function getTotalData()
+    {
         $orderModel = new \app\api\model\Order();
         $dealerOrderModel = new \app\api\model\dealer\Order();
         $withdrawModel = new Withdraw();
         $totalPrice = $orderModel->sum("order_price");
-        $payable = $dealerOrderModel->where('is_settled',1)->select();
+        $payable = $dealerOrderModel->where('is_settled', 1)->select();
         $payableMoney = 0.00;
-        foreach ($payable as $key => $value){
+        foreach ($payable as $key => $value) {
             $payableMoney += $value['first_money'];
             $payableMoney += $value['second_money'];
             $payableMoney += $value['third_money'];
-            if($value['team_money_resource'] !== ""){
+            if ($value['team_money_resource'] !== "") {
                 $team_money = 0.00;
-                $team_money_resource = json_decode($value['team_money_resource'],true);
-                foreach ($team_money_resource as $k => $v){
+                $team_money_resource = json_decode($value['team_money_resource'], true);
+                foreach ($team_money_resource as $k => $v) {
                     $team_money += $v['money'];
                 }
                 $payableMoney += $team_money;
             }
         }
-        $totalWithdrawPrice = $withdrawModel->where('apply_status',40)->sum('money');
+        $totalWithdrawPrice = $withdrawModel->where('apply_status', 40)->sum('money');
 
-        $todayPrice = $orderModel->whereTime('create_time','today')->sum('order_price');
-        $todayPayable = $dealerOrderModel->where('is_settled',1)->whereTime('create_time','today')->select();
+        $todayPrice = $orderModel->whereTime('create_time', 'today')->sum('order_price');
+        $todayPayable = $dealerOrderModel->where('is_settled', 1)->whereTime('create_time', 'today')->select();
         $todayPayablePrice = 0.00;
-        foreach ($todayPayable as $key => $value){
+        foreach ($todayPayable as $key => $value) {
             $todayPayablePrice += $value['first_money'];
             $todayPayablePrice += $value['second_money'];
             $todayPayablePrice += $value['third_money'];
-            if($value['team_money_resource'] !== ""){
+            if ($value['team_money_resource'] !== "") {
                 $team_money = 0.00;
-                $team_money_resource = json_decode($value['team_money_resource'],true);
-                foreach ($team_money_resource as $k => $v){
+                $team_money_resource = json_decode($value['team_money_resource'], true);
+                foreach ($team_money_resource as $k => $v) {
                     $team_money += $v['money'];
                 }
                 $todayPayablePrice += $team_money;
             }
         }
-        $todayWithdrawPrice = $withdrawModel->whereTime('create_time','today')->where('apply_status',40)->sum('money');
+        $todayWithdrawPrice = $withdrawModel->whereTime('create_time', 'today')->where('apply_status', 40)->sum('money');
         $data = [
             'all' => [
                 'total_money' => $totalPrice,
                 'payable' => $payableMoney,
                 'pay_after' => $totalWithdrawPrice,
-                'precipitation' => bcsub($payableMoney,$totalWithdrawPrice,2)
+                'precipitation' => bcsub($payableMoney, $totalWithdrawPrice, 2)
             ],
             'today' => [
                 'totay_money' => $todayPrice,
                 'pay_able' => $todayPayablePrice,
                 'pay_after' => $todayWithdrawPrice,
-                'precipitation' => bcsub($todayPayablePrice,$todayWithdrawPrice,2)
+                'precipitation' => bcsub($todayPayablePrice, $todayWithdrawPrice, 2)
             ]
         ];
         return $data;
@@ -438,7 +444,7 @@ class Order extends Controller
         // 构建微信支付请求
         // 构建支付宝请求
         $model = new OrderModel();
-        $order_no = $model->where('order_id',$Checkout->model['order_id'])->field('order_no')->find()['order_no'];
+        $order_no = $model->where('order_id', $Checkout->model['order_id'])->field('order_no')->find()['order_no'];
         $orderInfo = $model->getPayDetail($order_no);
         $aliUser = new AliPayUserModel(
             config('alipay')['appId'],
@@ -455,13 +461,13 @@ class Order extends Controller
             [
                 'body' => $orderInfo['goods'][0]['goods_name'],
                 'subject' => $orderInfo['goods'][0]['goods_name'],
-                'out_trade_no'=>$orderInfo['order_no'],
-                'timeout_express'=>'180m',
-                'total_amount'=>$orderInfo['pay_price'],
-                'product_code'=>'QUICK_MSECURITY_PAY'],
+                'out_trade_no' => $orderInfo['order_no'],
+                'timeout_express' => '180m',
+                'total_amount' => $orderInfo['pay_price'],
+                'product_code' => 'QUICK_MSECURITY_PAY'],
             JSON_UNESCAPED_UNICODE);
 
-        $request->setNotifyUrl($this->request->domain()."/alipay.php");
+        $request->setNotifyUrl($this->request->domain() . "/alipay.php");
         $request->setBizContent($info);
         $response = $aliUser->aop->sdkExecute($request);
         //htmlspecialchars是为了输出到页面时防止被浏览器将关键参数html转义，实际打印到日志以及http传输不会有这个问题

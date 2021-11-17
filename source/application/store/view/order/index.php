@@ -183,7 +183,11 @@ use app\common\enum\DeliveryType as DeliveryTypeEnum;
                                             </td>
                                             <td class="am-text-middle" rowspan="1">
                                                 <div class="tpl-table-black-operation">
+                                                    <?php
+                                                        if(!empty($order['audit_image']['file_path'])) :
+                                                    ?>
                                                     <img class="view_audit" src="<?php echo $order['audit_image']['file_path'] ?>" style="width:50px;height:50px;" />
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                             <td class="am-text-middle" rowspan="<?= $goodsCount ?>">
@@ -212,7 +216,7 @@ use app\common\enum\DeliveryType as DeliveryTypeEnum;
                                                         <?php endif; ?>
                                                     <?php endif; ?>
                                                     <?php if($order['order_status']['value'] == 10
-                                                        && $order['is_audit'] == 0
+                                                        && $order['is_audit'] == 0 && $order["pay_type"]["value"] !== 40
                                                     ): ?>
                                                     <a class="item-audit tpl-table-black-operation-del audit"
                                                        href="javascript:void(0);" data-id="<?php echo $order['order_id'] ?>">审核操作</a>

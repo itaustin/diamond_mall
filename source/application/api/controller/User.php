@@ -426,4 +426,26 @@ class User extends Controller
             ]);
         return $this->renderSuccess("", "等级修改成功");
     }
+
+    public function forwardPoints(){
+        $mobile_phone = input("mobile_phone");
+        $userInfo = $this->getUser();
+        $model = new UserModel();
+        $forWardUserInfo = $model->where("username", $mobile_phone)
+            ->find();
+        if(empty($forWardUserInfo)){
+            return $this->renderError("接收者不存在，请检查接收人手机号是否有误。", "");
+        } else {
+            // 如果存在
+            $points_num = input("points_num");
+            // 检测自己的积分是否足够
+            if($userInfo["handling_fee_points"] >= $points_num) {
+                $model->where("user_id", $userInfo["user_id"])->setDec("handling_fee_points", $points_num);
+                $model->where("user_id", $forWardUserInfo["user_id"])->setInc("handling_fee_points", $points_num);
+                return $this->renderSuccess("", "转发成功");
+            } else {
+                return $this->renderError("您的手工积分不足以发送给他人", "");
+            }
+        }
+    }
 }
