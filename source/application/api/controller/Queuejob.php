@@ -8,15 +8,15 @@ use think\Queue;
 class Queuejob extends Controller
 {
     public function job(){
-//        $jobHandlerClassName = 'app\common\job\OrderQueue';
-//        $jobQueueName = "OrderDealWith";
-//        $jobData = ["user_id" => "10029"];
-//        Queue::later(1, $jobHandlerClassName, $jobData, $jobQueueName);
-
-        $jobHandlerClassName = 'app\common\job\SameLevel';
-        $jobQueueName = "OrderSameLevel";
-        $jobData = ["user_id" => "10020"];
+        $jobHandlerClassName = 'app\common\job\OrderQueue';
+        $jobQueueName = "OrderDealWith";
+        $jobData = ["user_id" => "10029"];
         Queue::later(1, $jobHandlerClassName, $jobData, $jobQueueName);
+
+//        $jobHandlerClassName = 'app\common\job\SameLevel';
+//        $jobQueueName = "OrderSameLevel";
+//        $jobData = ["user_id" => "10020"];
+//        Queue::later(1, $jobHandlerClassName, $jobData, $jobQueueName);
     }
 
     /**

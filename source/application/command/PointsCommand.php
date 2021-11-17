@@ -170,7 +170,7 @@ class PointsCommand extends Command
                 ->where("points", ">", 0)
                 ->select();
             foreach ($allUser as $allUserValue) {
-                echo "------------------------------------------";
+                echo "------------------------------------------\r\n";
                 $levelGrade = [0,0.2,0.4,0.6,0.9,1.2];
                 $GLOBALS['all_user'] = [];
                 $this->getFirst($allUserValue["user_id"]);

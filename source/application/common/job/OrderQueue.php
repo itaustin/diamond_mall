@@ -22,7 +22,7 @@ class OrderQueue
         $model = new PointsCaptial();
         $userModel = new User();
         $todayData = $model
-//            ->whereTime("create_time", "today")
+            ->whereTime("create_time", "today")
             ->where("type", "not in","10")
             ->select();
         foreach ($todayData as $value) {
