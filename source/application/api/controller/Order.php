@@ -314,7 +314,7 @@ class Order extends Controller
             $request->setBizContent($info);
             $response = $aliUser->aop->sdkExecute($request);
             //htmlspecialchars是为了输出到页面时防止被浏览器将关键参数html转义，实际打印到日志以及http传输不会有这个问题
-            return $this->renderSuccess(htmlspecialchars_decode($response));
+            return $this->renderSuccess(2);
         }
     }
 

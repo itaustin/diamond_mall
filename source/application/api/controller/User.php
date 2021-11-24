@@ -269,7 +269,9 @@ class User extends Controller
         $user_ids = $user_ids . $user["user_id"];
         $team_total_price = $orderModel
             ->where("pay_status", 20)
-            ->where("user_id", "in", $user_ids)->sum("pay_price");
+            ->where("user_id", "in", $user_ids)
+            ->where("order_status", "not in", "20,21")
+            ->sum("pay_price");
         $allReferee = $model
             ->with(['user'])
             ->where("level",input("level"))
@@ -297,6 +299,7 @@ class User extends Controller
 
             $value['order_total_price'] = $orderModel
                 ->where("user_id",$value['user']['user_id'])
+                ->where("order_status", "not in", "20,21")
                 ->where("pay_status", 20)
                 ->sum("pay_price");
         }
@@ -422,7 +425,8 @@ class User extends Controller
         $model = new UserModel();
         $model->where("user_id", $user_id)
             ->update([
-                "level" => $level
+                "level" => $level,
+                "is_hand" => 1
             ]);
         return $this->renderSuccess("", "等级修改成功");
     }

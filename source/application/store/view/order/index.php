@@ -221,6 +221,8 @@ use app\common\enum\DeliveryType as DeliveryTypeEnum;
                                                     <a class="item-audit tpl-table-black-operation-del audit"
                                                        href="javascript:void(0);" data-id="<?php echo $order['order_id'] ?>">审核操作</a>
                                                     <?php endif; ?>
+                                                    <a class="item-delete tpl-table-black-operation-del audit"
+                                                       href="javascript:void(0);" data-id="<?php echo $order['order_id'] ?>">删除订单</a>
                                                 </div>
                                             </td>
                                         <?php endif; ?>
@@ -251,6 +253,9 @@ use app\common\enum\DeliveryType as DeliveryTypeEnum;
 
         var url = "index.php?s=/store/order/audit";
         $('.item-audit').audit('order_id', url);
+
+        var delete_url = "index.php?s=/store/order/delete";
+        $('.item-delete').delete('order_id', delete_url);
 
         $(".view_audit").click(function () {
             var url = $(this).attr("src");

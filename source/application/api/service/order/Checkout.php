@@ -701,6 +701,7 @@ class Checkout
             'total_price' => $order['order_total_price'],
             'order_price' => $order['order_price'],
             'coupon_id' => $order['coupon_id'],
+            'category_id' => $order["goods_list"][0]["category_id"],
             'coupon_money' => $order['coupon_money'],
             'points_money' => $isExistPointsDeduction ? $order['points_money'] : 0.00,
             'points_num' => $isExistPointsDeduction ? $order['points_num'] : 0,

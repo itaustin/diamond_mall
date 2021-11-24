@@ -72,6 +72,7 @@
                                 <th>兑换积分</th>
                                 <th>手续费积分</th>
                                 <th>当前等级</th>
+                                <th>推荐人</th>
                                 <th>真实姓名</th>
                                 <th>是否实名认证</th>
 <!--                                <th>会员等级</th>-->
@@ -98,6 +99,7 @@
                                     <td class="am-text-middle"><?= $item['points'] ?></td>
                                     <td class="am-text-middle"><?= $item['freeze_points'] ?></td>
                                     <td class="am-text-middle"><?= $item['handling_fee_points'] ?></td>
+                                    <td class="am-text-middle"><?= $item['level'] ?></td>
                                     <td class="am-text-middle"><?= $item['level'] ?></td>
                                     <td class="am-text-middle"><?= $item['real_name'] ?></td>
                                     <td class="am-text-middle"><?= $item['is_certification'] == 0 ? "<span style='color:red;'>未认证</span>" : "已认证" ?></td>

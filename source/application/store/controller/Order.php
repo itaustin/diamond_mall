@@ -185,12 +185,23 @@ class Order extends Controller
             ];
             $allUser = $userModel->select();
             foreach ($allUser as $user) {
-                $level = $this->checkTeamGrade($user["user_id"]);
                 $userModel = new User();
-                $userModel->where("user_id", $user["user_id"])
-                    ->update([
-                        "level" => $level
-                    ]);
+                $userInfo = $userModel->where("user_id", $user["user_id"])->find();
+                $level = $this->checkTeamGrade($user["user_id"]);
+                if($userInfo["is_hand"] == 1) {
+                    if($level > $userInfo["level"]){
+                        $userModel->where("user_id", $user["user_id"])
+                            ->update([
+                                "level" => $level
+                            ]);
+                    }
+                } else {
+                    $userModel->where("user_id", $user["user_id"])
+                        ->update([
+                            "level" => $level
+                        ]);
+                }
+
             }
             // 开始赠送黄金券
             $gold_g = $orderInfo["order_price"] / 1000;
@@ -222,6 +233,7 @@ class Order extends Controller
         $user_ids = substr($user_ids, 0 ,strlen($user_ids)-1);
         $totalPerformance = $model
             ->where("user_id", "in", $user_ids)
+            ->where("pay_status", 20)
             ->sum("pay_price");
         if($totalPerformance >= 200000) {
             return true;
@@ -242,6 +254,7 @@ class Order extends Controller
         $user_ids = substr($user_ids, 0 ,strlen($user_ids)-1);
         $totalPerformance = $model
             ->where("user_id", "in", $user_ids)
+            ->where("pay_status", 20)
             ->sum("pay_price");
         if($totalPerformance >= 800000) {
             $v1Count = 0;
@@ -274,6 +287,7 @@ class Order extends Controller
         $user_ids = substr($user_ids, 0 ,strlen($user_ids)-1);
         $totalPerformance = $model
             ->where("user_id", "in", $user_ids)
+            ->where("pay_status", 20)
             ->sum("pay_price");
         if($totalPerformance >= 2000000) {
             $v2Count = 0;
@@ -306,6 +320,7 @@ class Order extends Controller
         $user_ids = substr($user_ids, 0 ,strlen($user_ids)-1);
         $totalPerformance = $model
             ->where("user_id", "in", $user_ids)
+            ->where("pay_status", 20)
             ->sum("pay_price");
         if($totalPerformance >= 5000000) {
             $v3Count = 0;
@@ -338,6 +353,7 @@ class Order extends Controller
         $user_ids = substr($user_ids, 0 ,strlen($user_ids)-1);
         $totalPerformance = $model
             ->where("user_id", "in", $user_ids)
+            ->where("pay_status", 20)
             ->sum("pay_price");
         if($totalPerformance >= 12000000) {
             $v4Count = 0;
@@ -374,10 +390,6 @@ class Order extends Controller
         if($this->checkTeamFiveGrade($user_id)) {
             $level = 5;
         }
-        $userModel = new User();
-        $userModel->where("user_id", $user_id)->update([
-            "level" => $level
-        ]);
         return $level;
     }
 
@@ -395,12 +407,39 @@ class Order extends Controller
         }
     }
 
-    public function updateTeam($user_id){
-        $level = $this->checkTeamGrade($orderInfo["user_id"]);
+    public function updateTeam(){
         $userModel = new User();
-        $userModel->where("user_id", $orderInfo["user_id"])
+        $data = $userModel
+            ->where("user_id", 10004)
+            ->select();
+        foreach ($data as $value){
+            $level = $this->checkTeamGrade($value["user_id"]);
+            if($value["is_hand"] == 1) {
+                if($level > $value["level"]){
+                    echo $value["user_id"] . "更新等级" . $level . "<br/>";
+//                    $userModel->where("user_id", $user["user_id"])
+//                        ->update([
+//                            "level" => $level
+//                        ]);
+                } else {
+
+                }
+            } else {
+                echo $value["user_id"] . "更新等级" . $level."<br/>";
+//                $userModel->where("user_id", $user["user_id"])
+//                    ->update([
+//                        "level" => $level
+//                    ]);
+            }
+        }
+    }
+
+    public function delete($order_id) {
+        $model = new OrderModel();
+        $model->where("order_id", $order_id)
             ->update([
-                "level" => $level
+                "is_delete" => 1
             ]);
+        return $this->renderSuccess("删除成功");
     }
 }

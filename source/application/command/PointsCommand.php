@@ -160,10 +160,6 @@ class PointsCommand extends Command
                         "create_time" => time()
                     ]);
                 }
-
-                // 开始计算团队
-                // 计算自己是什么等级
-                $this->checkTeamGrade($value["user_id"]);
             }
 
             $allUser = $model
@@ -179,7 +175,8 @@ class PointsCommand extends Command
                     $user_ids .= $value["user_id"] . ",";
                 }
                 $user_ids .= $allUserValue["user_id"];
-                $allPoints = $model->where("user_id", "in", $user_ids)
+                $allPoints = $model
+                    ->where("user_id", "in", $user_ids)
                     ->sum("all_points");
                 $thousand_3 = bcmul($allPoints, 0.003,2);
 
@@ -189,7 +186,8 @@ class PointsCommand extends Command
                     ->where("level",1)
                     ->find();
                 // 看上级是什么级别
-                $topUserInfo = $model->where("user_id", $topUserId["dealer_id"])
+                $topUserInfo = $model
+                    ->where("user_id", $topUserId["dealer_id"])
                     ->find();
                 $topUserLevel = $topUserInfo["level"];
 //                    dump($allUserValue["level"]);
@@ -213,10 +211,10 @@ class PointsCommand extends Command
                 }
 
             }
-            $jobHandlerClassName = 'app\common\job\OrderQueue';
-            $jobQueueName = "OrderDealWith";
-            $jobData = ["time" => "today"];
-            Queue::later(1, $jobHandlerClassName, $jobData, $jobQueueName);
+//            $jobHandlerClassName = 'app\common\job\OrderQueue';
+//            $jobQueueName = "OrderDealWith";
+//            $jobData = ["time" => "today"];
+//            Queue::later(1, $jobHandlerClassName, $jobData, $jobQueueName);
             $model->commit();
         } catch (BaseException $exception){
             $this->output->writeln($exception->getMessage());
