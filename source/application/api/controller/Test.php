@@ -14,7 +14,7 @@ class Test extends Controller
 //            ->where("user_id", "10004")
             ->select();
         foreach ($allUser as $allUserValue) {
-            echo "------------------------------------------<br/>";
+//            echo "------------------------------------------<br/>";
             $levelGrade = [0,0.2,0.4,0.6,0.9,1.2];
             $GLOBALS['all_user'] = [];
             $this->getFirst($allUserValue["user_id"]);
@@ -69,7 +69,7 @@ class Test extends Controller
 //                    "create_time" => time()
 //                ]);
             } else {
-                echo "暂无数据<br/>";
+//                echo "<span style='color:red;font-size:12px;'>暂无数据</span><br/>";
             }
         }
     }
