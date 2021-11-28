@@ -100,7 +100,7 @@
                                     <td class="am-text-middle"><?= $item['freeze_points'] ?></td>
                                     <td class="am-text-middle"><?= $item['handling_fee_points'] ?></td>
                                     <td class="am-text-middle"><?= $item['level'] ?></td>
-                                    <td class="am-text-middle"><?= $item['level'] ?></td>
+                                    <td class="am-text-middle"><?= $item['parent']["username"] ?></td>
                                     <td class="am-text-middle"><?= $item['real_name'] ?></td>
                                     <td class="am-text-middle"><?= $item['is_certification'] == 0 ? "<span style='color:red;'>未认证</span>" : "已认证" ?></td>
 <!--                                    <td class="am-text-middle">-->

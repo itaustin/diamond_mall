@@ -65,6 +65,19 @@ class Passport extends Controller
                 $model->where("user_id",$model['user_id'])->update([
                     "active_code" => $inviteUtil->encode($model['user_id'])
                 ]);
+                $model->where("user_id", $model["user_id"])
+                    ->update([
+                        "is_leaf" => 1
+                    ]);
+                $GLOBALS['allParentUserIds'] = [];
+                $this->getTopLine($model["user_id"]);
+                $data = $GLOBALS['allParentUserIds'];
+                foreach ($data as $value) {
+                    $model->where("user_id", $value)
+                        ->update([
+                            "is_leaf" => 0
+                        ]);
+                }
                 $model->commit();
                 return $this->renderSuccess("","注册成功...");
             } else {
@@ -72,6 +85,22 @@ class Passport extends Controller
             }
         } catch (\Exception $e){
             throw new BaseException(["msg" => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @description 获取推荐关系的一条线
+     * @param $user_id
+     */
+    public function getTopLine($user_id){
+        $model = new UserReferee();
+        // 找到自己的上级
+        $dealer_id = $model->where("user_id", $user_id)
+            ->where("level", 1)
+            ->value("dealer_id");
+        if(!empty($dealer_id)){
+            $GLOBALS['allParentUserIds'][] = $dealer_id;
+            $this->getTopLine($dealer_id);
         }
     }
 

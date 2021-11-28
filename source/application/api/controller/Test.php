@@ -74,6 +74,31 @@ class Test extends Controller
         }
     }
 
+    public function getTopLevelData($user_id){
+        $GLOBALS['allParentUserIds'] = [];
+        $this->getTopLine($user_id);
+        $data = $GLOBALS['allParentUserIds'];
+        $newData = [];
+        $model = new \app\api\model\User();
+        foreach ($data as $value) {
+            $userInfo = $model->where("user_id", $value)->find();
+            if($userInfo["level"] > 0) {
+                $newData[] = [
+                    "user_id" => $value,
+                    "level" => $userInfo["level"],
+                    "username" => $userInfo["username"]
+                ];
+            }
+        }
+        dump($newData);
+    }
+
+    public function viewReferee(){
+        $model = new UserReferee();
+        $user_id = 10001;
+        $this->getDirectPushers($user_id);
+    }
+
     public function getFirst($user_id)
     {
         $model = new UserReferee();
@@ -85,6 +110,22 @@ class Test extends Controller
         foreach ($data as $value) {
             $GLOBALS['all_user'][] = $value['users']->toArray();
             $this->getFirst($value["user_id"]);
+        }
+    }
+
+    /**
+     * @description 获取推荐关系的一条线
+     * @param $user_id
+     */
+    public function getTopLine($user_id){
+        $model = new UserReferee();
+        // 找到自己的上级
+        $dealer_id = $model->where("user_id", $user_id)
+            ->where("level", 1)
+            ->value("dealer_id");
+        if(!empty($dealer_id)){
+            $GLOBALS['allParentUserIds'][] = $dealer_id;
+            $this->getTopLine($dealer_id);
         }
     }
 }

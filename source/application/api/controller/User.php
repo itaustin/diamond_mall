@@ -8,6 +8,7 @@ use app\api\model\Order as OrderModel;
 use app\api\model\UserReferee;
 use app\common\exception\BaseException;
 use app\common\model\GoldCoupon;
+use app\common\model\PointsCaptial;
 use think\Cache;
 use think\Cookie;
 use think\Session;
@@ -271,6 +272,7 @@ class User extends Controller
             ->where("pay_status", 20)
             ->where("user_id", "in", $user_ids)
             ->where("order_status", "not in", "20,21")
+            ->where("is_delete", 0)
             ->sum("pay_price");
         $allReferee = $model
             ->with(['user'])
@@ -373,24 +375,46 @@ class User extends Controller
         $user = $this->getUser();
         $model = new UserModel();
         $g = input("g");
-        $freeze_points = input("handling_fee_points");
         $goldCouponModel = new GoldCoupon();
         $model->startTrans();
         try {
-            if($user["freeze_points"] >= $freeze_points){
-                $model->where("user_id", $user["user_id"])
-                    ->setDec("freeze_points", $freeze_points);
-                $goldCouponModel->insert([
-                    "user_id" => $user["user_id"],
-                    "order_id" => 0,
-                    "money" => $g,
-                    "is_need_fee" => 1
-                ]);
-                $model->commit();
-                return $this->renderSuccess("","兑换成功");
+            // 先检测手工积分是否足够
+            $freeze_points = bcmul($g, $user["g_exchange_price"], 2);
+            $handling_fee_points = bcmul($g, $user["g_price"], 2);
+            if($user["handling_fee_points"] >= $handling_fee_points) {
+                // 满足手工积分
+                if($user["freeze_points"] >= $freeze_points){
+                    $model->where("user_id", $user["user_id"])
+                        ->setDec("freeze_points", $freeze_points);
+                    $model->where("user_id", $user["user_id"])
+                        ->setDec("handling_fee_points", $handling_fee_points);
+                    $goldCouponModel->insert([
+                        "user_id" => $user["user_id"],
+                        "order_id" => 0,
+                        "money" => $g,
+                        "is_need_fee" => 1,
+                        "create_time" => time(),
+                        "update_time" => time()
+                    ]);
+                    $pointsCaptialModel = new PointsCaptial();
+                    $pointsCaptialModel->insert([
+                        "user_id" => $user['user_id'],
+                        "type" => 10,
+                        "order_id" => 0,
+                        "points" => $order['pay_price'],
+                        "create_time" => time(),
+                        "description" => "兑换黄金，共花费" . $freeze_points . "积分、" . $handling_fee_points . "手工积分",
+                        "consignment_money" => 0.00
+                    ]);
+                    $model->commit();
+                    return $this->renderSuccess("","兑换成功");
+                } else {
+                    return $this->renderError("您的可用积分不足以兑换{$g}g黄金", "");
+                }
             } else {
-                return $this->renderError("您的可用积分不足以兑换{$g}g黄金", "");
+                return $this->renderError("您的手工积分不足","");
             }
+
         } catch (BaseException $exception) {
             return $this->renderError($exception->getMessage(),"");
         }

@@ -30,6 +30,7 @@ class StartFreedCommand extends Command
         $todayData = $model
             ->whereTime("create_time", "today")
             ->where("type", "not in","10,20,60")
+//            ->where("description", "拿平级团队的加速释放")
 //            ->where("user_id", "in", "10019")
             ->where("is_delete", 0)
             ->select();

@@ -13,4 +13,5 @@ return [
     'app\command\PickUpPointsCommand',
     'app\command\PointsCommand',
     'app\command\StartFreedCommand',
+    'app\command\SameLevelCommand',
 ];

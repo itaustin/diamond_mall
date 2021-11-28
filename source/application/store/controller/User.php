@@ -2,6 +2,7 @@
 
 namespace app\store\controller;
 
+use app\api\model\UserReferee;
 use app\store\model\User as UserModel;
 use app\store\model\user\Grade as GradeModel;
 
@@ -24,6 +25,15 @@ class User extends Controller
     {
         $model = new UserModel;
         $list = $model->getList($nickName, $gender, $grade);
+        $refereeModel = new UserReferee();
+        foreach ($list as $v){
+            $dealer_id = $refereeModel->where("user_id", $v["user_id"])
+                ->where("level", 1)
+                ->value("dealer_id");
+            $data = $model->where("user_id", $dealer_id)
+                ->find();
+            $v["parent"] = $data;
+        }
         // 会员等级列表
         $gradeList = GradeModel::getUsableList();
         return $this->fetch('index', compact('list', 'gradeList'));

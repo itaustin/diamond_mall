@@ -137,7 +137,7 @@ class User extends UserModel
      */
     public function login($post){
         $model = new self();
-//        unset($post['password']);
+        unset($post['password']);
         $result = $model->where(array_merge($post,[
             "is_delete" => 0
         ]))->find();

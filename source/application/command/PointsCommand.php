@@ -162,62 +162,199 @@ class PointsCommand extends Command
                 }
             }
 
-            $allUser = $model
-                ->where("points", ">", 0)
+            // 查找出所有的尾节点(leaf node)
+            $allLeafUser = $model
+                ->where("is_leaf", 1)
                 ->select();
-            foreach ($allUser as $allUserValue) {
-                echo "------------------------------------------\r\n";
-                $levelGrade = [0,0.2,0.4,0.6,0.9,1.2];
-                $GLOBALS['all_user'] = [];
-                $this->getFirst($allUserValue["user_id"]);
-                $user_ids = "";
-                foreach ($GLOBALS['all_user'] as $value) {
-                    $user_ids .= $value["user_id"] . ",";
+            foreach ($allLeafUser as $leaf) {
+                // 查找出所有上级
+                $GLOBALS['allParentUserIds'] = [];
+                $this->getTopLine($leaf["user_id"]);
+                $data = $GLOBALS['allParentUserIds'];
+                foreach ($data as $value) {
+                    $this->repeatDealWith($value);
                 }
-                $user_ids .= $allUserValue["user_id"];
-                $allPoints = $model
-                    ->where("user_id", "in", $user_ids)
-                    ->sum("all_points");
-                $thousand_3 = bcmul($allPoints, 0.003,2);
-
-                // 查找上级
-                $topUserId = $refereeModel
-                    ->where("user_id", $allUserValue["user_id"])
-                    ->where("level",1)
-                    ->find();
-                // 看上级是什么级别
-                $topUserInfo = $model
-                    ->where("user_id", $topUserId["dealer_id"])
-                    ->find();
-                $topUserLevel = $topUserInfo["level"];
-//                    dump($allUserValue["level"]);
-                $myLevel = $allUserValue["level"];
-//                    dump($myLevel);
-//                    dump($topUserLevel);
-                if($myLevel < $topUserLevel) {
-                    $percent = bcsub($levelGrade[$topUserLevel], $levelGrade[$myLevel], 2);
-                    $fee = bcmul($thousand_3, $percent, 2);
-                    $pointsCapitalModel->insert([
-                        "order_id" => 0,
-                        "type" => 50,
-                        "user_id" => $topUserId["dealer_id"],
-                        "points" => $fee,
-                        "description" => "拿级差团队的加速释放",
-                        "consignment_money" => 0,
-                        "is_delete" => 0,
-                        "wxapp_id" => 10001,
-                        "create_time" => time()
-                    ]);
-                }
-
             }
+
+//            $allUser = $model
+//                ->where("points", ">", 0)
+////                ->where("level", ">", 0)
+//                ->select();
+//            foreach ($allUser as $allUserValue) {
+////                echo "------------------------------------------\r\n";
+//                $levelGrade = [0,0.2,0.4,0.6,0.9,1.2];
+//                $GLOBALS['all_user'] = [];
+//                $this->getFirst($allUserValue["user_id"]);
+//                $user_ids = "";
+//                foreach ($GLOBALS['all_user'] as $value) {
+//                    $user_ids .= $value["user_id"] . ",";
+//                }
+//                $user_ids .= $allUserValue["user_id"];
+//                $allPoints = $model
+//                    ->where("user_id", "in", $user_ids)
+//                    ->sum("all_points");
+//                $thousand_3 = bcmul($allPoints, 0.003,2);
+//
+//                // 查找上级
+//                $topUserId = $refereeModel
+//                    ->where("user_id", $allUserValue["user_id"])
+//                    ->where("level",1)
+//                    ->find();
+//                // 看上级是什么级别
+//                $topUserInfo = $model
+//                    ->where("user_id", $topUserId["dealer_id"])
+//                    ->find();
+//                $topUserLevel = $topUserInfo["level"];
+////                    dump($allUserValue["level"]);
+//                $myLevel = $allUserValue["level"];
+////                    dump($myLevel);
+////                    dump($topUserLevel);
+////                echo $allUserValue["username"] . "的上级如下";
+//                $GLOBALS['allParentUserIds'] = [];
+//                $this->getTopLine($allUserValue["user_id"]);
+//                $topUserData = $GLOBALS['allParentUserIds'];
+//                $topUserNewData = [];
+//                foreach ($topUserData as $vv) {
+//                    $info = $model->where("user_id", $vv)
+//                        ->find();
+//                    $topUserNewData[] = [
+//                        "user_id" => $vv,
+//                        "level" => $info["level"],
+//                        "username" => $info["username"]
+//                    ];
+//                }
+//                if($myLevel < $topUserInfo["level"]) {
+////                        echo $allUserValue["username"] . "的千分之3是" . $thousand_3 . "\r\n";
+//                    $percent = bcsub($levelGrade[$topUserInfo["level"]], $levelGrade[$myLevel], 2);
+//                    $fee = bcmul($thousand_3, $percent, 2);
+//                    $pointsCapitalModel->insert([
+//                        "order_id" => 0,
+//                        "type" => 50,
+//                        "user_id" => $topUserInfo["user_id"],
+//                        "points" => $fee,
+//                        "description" => $topUserInfo["username"] . "拿" . $allUserValue["username"] . "的级差团队的加速释放，极差的百分比是：" . $percent,
+//                        "consignment_money" => 0,
+//                        "is_delete" => 0,
+//                        "wxapp_id" => 10001,
+//                        "create_time" => time()
+//                    ]);
+//                    echo $topUserInfo["username"] . "拿" . $allUserValue["username"]
+//                        .
+//                        "的级差团队的加速释放，极差的百分比是："
+//                        .
+//                        $percent . "积分是：" . $fee . "\r\n";
+////                        dump([
+////                            "order_id" => 0,
+////                            "type" => 50,
+////                            "user_id" => $thouData["user_id"],
+////                            "points" => $fee,
+////                            "description" => $thouData["username"] . "拿" . $allUserValue["username"] . "的级差团队的加速释放，极差的百分比是：" . $percent,
+////                            "consignment_money" => 0,
+////                            "is_delete" => 0,
+////                            "wxapp_id" => 10001,
+////                            "create_time" => time()
+////                        ]);
+//                }
+//            }
 //            $jobHandlerClassName = 'app\common\job\OrderQueue';
 //            $jobQueueName = "OrderDealWith";
 //            $jobData = ["time" => "today"];
 //            Queue::later(1, $jobHandlerClassName, $jobData, $jobQueueName);
-            $model->commit();
+//            $model->commit();
         } catch (BaseException $exception){
             $this->output->writeln($exception->getMessage());
+        }
+    }
+
+    public function repeatDealWith($user_id){
+        $model = new Order();
+        $userModel = new User();
+        $pointsCapitalModel = new PointsCaptial();
+        $leaf = $userModel->where("user_id", $user_id)
+            ->find();
+        // 定义级别
+        $levelGrade = [0,0.2,0.4,0.6,0.9,1.2];
+        // 查找出子节点上面的所有人
+        $GLOBALS['allParentUserIds'] = [];
+        $this->getTopLine($user_id);
+        $data = $GLOBALS['allParentUserIds'];
+        // 循环遍历所有的父节点
+        if(!empty($data)) {
+            $newParent = [];
+            foreach ($data as $parent) {
+                // 把有级别的父节点放在新数组中
+                $info = $userModel->where("user_id", $parent)
+                    ->find();
+                if($info["level"] > 0){
+                    // 把有级别的父亲节点都找出来
+                    $newParent[] = [
+                        "user_id" => $info["user_id"],
+                        "username" => $info["username"],
+                        "level" => $info["level"],
+                        "is_leaf" => $info["is_leaf"]
+                    ];
+                }
+            }
+            // 查找出自己的全部积分
+            $allPoints = $userModel
+                ->where("user_id", $leaf["user_id"])
+                ->value("all_points");
+            // 计算自己全部积分的千分之3
+            $thousand_3 = bcmul($allPoints, 0.003,2);
+            foreach ($newParent as $newParentInfo){
+                if($newParentInfo["level"] == 5){
+                    break;
+                }
+                if($leaf["level"] !== -1){
+                    if($leaf["level"] < $newParentInfo["level"]) {
+//                            echo $allUserValue["username"] . "的千分之3是" . $thousand_3 . "\r\n";
+                        $percent = bcsub($levelGrade[$newParentInfo["level"]], $levelGrade[$leaf["level"]], 2);
+                        if($thousand_3 == 0){
+                            continue;
+                        }
+                        $fee = bcmul($thousand_3, $percent, 2);
+                        $pointsCapitalModel->insert([
+                            "order_id" => 0,
+                            "type" => 50,
+                            "user_id" => $newParentInfo["user_id"],
+                            "points" => $fee,
+                            "description" => $newParentInfo["username"] . "拿" . $leaf["username"] . "的级差团队的加速释放，极差的百分比是：" . $percent,
+                            "consignment_money" => 0,
+                            "is_delete" => 0,
+                            "wxapp_id" => 10001,
+                            "create_time" => time()
+                        ]);
+                        echo $newParentInfo["username"] . "拿" . $leaf["username"]
+                            .
+                            "的级差团队的加速释放，极差的百分比是："
+                            .
+                            $percent . "积分是：" . $fee . "\r\n";
+                    }
+                    if ($leaf["level"] == $newParentInfo["level"]) {
+                        $newParentUserInfo = $userModel->where("user_id", $newParentInfo["user_id"])
+                            ->find();
+                        $sameLevelThousands = bcmul($newParentUserInfo["all_points"], 0.003, 2);
+                        // 拿下级的20%
+                        $percent20Points = bcmul($sameLevelThousands, 0.2, 2);
+                        if($percent20Points <= 0){
+                            continue;
+                        }
+//                        $pointsCapitalModel->insert([
+//                            "order_id" => 0,
+//                            "type" => 50,
+//                            "user_id" => $newParentUserInfo["user_id"],
+//                            "points" => $percent20Points,
+//                            "description" => $newParentUserInfo["username"] . "拿" . $leaf["username"] . "平级团队的加速释放",
+//                            "consignment_money" => 0,
+//                            "is_delete" => 0,
+//                            "wxapp_id" => 10001,
+//                            "create_time" => time()
+//                        ]);
+                        echo "----------------------------\r\n";
+                        echo $newParentUserInfo["username"] . "拿" . $leaf["username"] . "平级团队的加速释放，积分是：" . $percent20Points ."\r\n";
+                    }
+                }
+            }
         }
     }
 
