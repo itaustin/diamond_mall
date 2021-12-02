@@ -28,7 +28,8 @@ class StartFreedCommand extends Command
         $model = new PointsCaptial();
         $userModel = new User();
         $todayData = $model
-            ->whereTime("create_time", "today")
+//            ->whereTime("create_time", "between", ["2021-11-28", "2021-11-29"])
+            ->whereTime("create_time", "yesterday")
             ->where("type", "not in","10,20,60")
 //            ->where("description", "拿平级团队的加速释放")
 //            ->where("user_id", "in", "10019")

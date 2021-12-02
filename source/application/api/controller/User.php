@@ -401,7 +401,7 @@ class User extends Controller
                         "user_id" => $user['user_id'],
                         "type" => 10,
                         "order_id" => 0,
-                        "points" => $order['pay_price'],
+                        "points" => $freeze_points,
                         "create_time" => time(),
                         "description" => "兑换黄金，共花费" . $freeze_points . "积分、" . $handling_fee_points . "手工积分",
                         "consignment_money" => 0.00
