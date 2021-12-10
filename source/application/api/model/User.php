@@ -137,12 +137,24 @@ class User extends UserModel
      */
     public function login($post){
         $model = new self();
-        unset($post['password']);
-        $result = $model->where(array_merge($post,[
+//        unset($post['password']);
+        $param = [
+            "username" => $post["username"],
+            "password" => $post["password"]
+        ];
+        $result = $model->where(array_merge($param,[
             "is_delete" => 0
         ]))->find();
-        if(empty($result)){
-            throw new BaseException(["msg" => "用户名或密码错误"]);
+        $active_code = Cache::get('sms_'.$param['username']);
+        if(isset($post["code"])) {
+            $result = $model->where("username", $param["username"])->find();
+            if($active_code !== $post["code"]) {
+                throw new BaseException(["msg" => "手机验证码错误"]);
+            }
+        } else {
+            if(empty($result)){
+                throw new BaseException(["msg" => "用户名或密码错误"]);
+            }
         }
         // 生成token
         $this->token = $this->token($result['username']);

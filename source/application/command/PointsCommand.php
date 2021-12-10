@@ -77,7 +77,7 @@ class PointsCommand extends Command
                             "consignment_money" => 0,
                             "is_delete" => 0,
                             "wxapp_id" => 10001,
-                            "create_time" => time()
+                            "create_time" => 1639062602
                         ]);
                     }
                 }
@@ -90,7 +90,7 @@ class PointsCommand extends Command
                     "consignment_money" => 0,
                     "is_delete" => 0,
                     "wxapp_id" => 10001,
-                    "create_time" => time()
+                    "create_time" => 1639062602
                 ]);
 //                $this->output->writeln("【" . $value["username"] . "<{$value['user_id']}>的静态释放为：" . $thousand . "】");
                 // 开始查询下拿一代是否有报单
@@ -123,7 +123,7 @@ class PointsCommand extends Command
                         "consignment_money" => 0,
                         "is_delete" => 0,
                         "wxapp_id" => 10001,
-                        "create_time" => time()
+                        "create_time" => 1639062602
                     ]);
                 }
 
@@ -157,7 +157,7 @@ class PointsCommand extends Command
                         "consignment_money" => 0,
                         "is_delete" => 0,
                         "wxapp_id" => 10001,
-                        "create_time" => time()
+                        "create_time" => 1639062602
                     ]);
                 }
             }
