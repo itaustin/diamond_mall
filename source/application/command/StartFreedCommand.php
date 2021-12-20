@@ -28,14 +28,15 @@ class StartFreedCommand extends Command
         $model = new PointsCaptial();
         $userModel = new User();
         $todayData = $model
-//            ->whereTime("create_time", "between", ["2021-11-28", "2021-11-29"])
-            ->whereTime("create_time", "yesterday")
+//            ->whereTime("create_time", "between", ["2021-12-18", "2021-12-19"])
+            ->whereTime("create_time", "today")
             ->where("type", "not in","10,20,60")
 //            ->where("description", "拿平级团队的加速释放")
 //            ->where("user_id", "in", "10019")
             ->where("is_delete", 0)
             ->select();
         foreach ($todayData as $value) {
+//            echo $value["create_time"] . "\r\n";
             $info = $userModel->where("user_id", $value["user_id"])->find();
             $userModel->startTrans();
             try {

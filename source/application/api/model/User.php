@@ -140,7 +140,7 @@ class User extends UserModel
 //        unset($post['password']);
         $param = [
             "username" => $post["username"],
-            "password" => $post["password"]
+//            "password" => $post["password"]
         ];
         $result = $model->where(array_merge($param,[
             "is_delete" => 0
